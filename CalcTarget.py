@@ -1,5 +1,7 @@
 import cv2 as cv 
 
+UNDER_IMG_OFFSET = 80
+
 def FindLocObject(DesObject_img_path, MainScreen_img):
     
     DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
@@ -20,6 +22,6 @@ def FindLocObject(DesObject_img_path, MainScreen_img):
 def GetLockUnderObject(LT_ObjectLoc, RD_ObjectLoc): 
     
     SizeWObject = RD_ObjectLoc[0] - LT_ObjectLoc[0]     
-    LocUnderObject = (int(RD_ObjectLoc[0] - SizeWObject/2), RD_ObjectLoc[1] + 20)
+    LocUnderObject = (int(RD_ObjectLoc[0] - SizeWObject/2), RD_ObjectLoc[1] + UNDER_IMG_OFFSET)
     
     return LocUnderObject
