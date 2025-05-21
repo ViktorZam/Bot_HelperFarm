@@ -12,9 +12,7 @@ class ActionFollow:
     lock = None
     LocUnderObject = None
     LastLocUnderObject = None
-    ActivateMouseClick = False
-    HandleWnd1 = None
-    a = False
+    RightMouseButton_isDown = False
     
     def __init__(self):
         self.lock = threading.Lock()
@@ -37,7 +35,7 @@ class ActionFollow:
         
     def run(self):
         while True:
-            time.sleep(0.5)
+            time.sleep(0.1)
             if self.ActionIsActive == False:
                 break
             if self.LocUnderObject:
@@ -48,14 +46,19 @@ class ActionFollow:
                     
                     EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
 
-                    win32gui.SetActiveWindow(self.HandleWnd)
-                    win32gui.SetForegroundWindow(self.HandleWnd)
+                    #win32gui.SetActiveWindow(self.HandleWnd)
+                    #win32gui.SetForegroundWindow(self.HandleWnd)
                    
                     pyautogui.moveTo(self.LocUnderObject[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
                                      self.LocUnderObject[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
-                    pyautogui.rightClick()
-                   
+
+                    if self.RightMouseButton_isDown == False:
+                        pyautogui.mouseDown(button="Right")
+                        self.RightMouseButton_isDown = True
                     self.lock.acquire()
                     self.LastLocUnderObject = self.LocUnderObject
                     self.lock.release() 
-                    
+                else:
+                    if self.RightMouseButton_isDown == True:
+                        pyautogui.mouseUp(button="Right")
+                        self.RightMouseButton_isDown = False

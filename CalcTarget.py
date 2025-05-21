@@ -10,14 +10,16 @@ def FindLocObject(DesObject_img_path, MainScreen_img):
     ResultMatch_img = cv.matchTemplate(MainScreen_img, DesObject_img, cv.TM_CCOEFF_NORMED)
 
     MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-    LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
-    SizeHChar_img = DesObject_img.shape[0]
-    SizeWChar_img = DesObject_img.shape[1]
-
-    RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
+    if MaxValMatch >= 0.7:
     
-    return LT_ObjectLoc, RD_ObjectLoc
-    
+        LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
+        SizeHChar_img = DesObject_img.shape[0]
+        SizeWChar_img = DesObject_img.shape[1]
+        
+        RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
+        
+        return LT_ObjectLoc, RD_ObjectLoc
+    return None
     
 def GetLockUnderObject(LT_ObjectLoc, RD_ObjectLoc): 
     

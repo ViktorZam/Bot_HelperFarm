@@ -22,7 +22,7 @@ def GetWindowHandle():
 
 def GetScreenshot():
     HandleWnd = GetWindowHandle()
-    if HandleWnd:  
+    if not HandleWnd is None:  
         EdgesWindow = win32gui.GetWindowRect(HandleWnd)
         #print ("EdgesWindow: ", EdgesWindow)
         width = EdgesWindow[2] - EdgesWindow[0]
@@ -39,24 +39,25 @@ def GetScreenshot():
         srcdc = win32ui.CreateDCFromHandle(hwindc)
         memdc = srcdc.CreateCompatibleDC()
         bmp = win32ui.CreateBitmap()
-        bmp.CreateCompatibleBitmap(srcdc, width, height)
-        memdc.SelectObject(bmp)
+        if width >=800:
+            bmp.CreateCompatibleBitmap(srcdc, width, height)
+            memdc.SelectObject(bmp)
 
-        windll.user32.PrintWindow(HandleWnd, memdc.GetSafeHdc(), 3)
+            windll.user32.PrintWindow(HandleWnd, memdc.GetSafeHdc(), 3)
 
-        signedIntsArray = bmp.GetBitmapBits(True)
-        img = numpy.fromstring(signedIntsArray, dtype='uint8')
-        img.shape = (height,width,4)
+            signedIntsArray = bmp.GetBitmapBits(True)
+            img = numpy.fromstring(signedIntsArray, dtype='uint8')
+            img.shape = (height,width,4)
 
-        srcdc.DeleteDC()
-        memdc.DeleteDC()
-        win32gui.ReleaseDC(HandleWnd, hwindc)
-        win32gui.DeleteObject(bmp.GetHandle())
+            srcdc.DeleteDC()
+            memdc.DeleteDC()
+            win32gui.ReleaseDC(HandleWnd, hwindc)
+            win32gui.DeleteObject(bmp.GetHandle())
 
-        img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
-        return img
-    else:
-        return None
+            img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
+            return img
+          
+    return None
         
 
 def winEnumHandler( hwnd, ctx ):
