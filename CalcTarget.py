@@ -1,6 +1,6 @@
 import cv2 as cv 
 
-UNDER_IMG_OFFSET = 80
+UNDER_IMG_OFFSET = 110
 
 def FindLocObject(DesObject_img_path, MainScreen_img):
     
