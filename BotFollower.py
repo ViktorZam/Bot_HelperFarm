@@ -44,7 +44,7 @@ while True:
             ActionFollow.stop()
             cv.destroyAllWindows()
             break
-        print("all done")
+        print("Next circle")
         
     else:
         time.sleep(2)

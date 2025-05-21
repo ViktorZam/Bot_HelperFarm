@@ -3,7 +3,7 @@ import cv2 as cv
 def FindLocObject(DesObject_img_path, MainScreen_img):
     
     DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
-    DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
+    #DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
     
     ResultMatch_img = cv.matchTemplate(MainScreen_img, DesObject_img, cv.TM_CCOEFF_NORMED)
 
