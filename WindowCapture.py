@@ -53,7 +53,7 @@ def GetScreenshot():
         win32gui.ReleaseDC(HandleWnd, hwindc)
         win32gui.DeleteObject(bmp.GetHandle())
 
-        #img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
+        img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
         return img
     else:
         return None
