@@ -25,7 +25,7 @@ while True:
     
     if not ScreenWindow is None:
 
-        LT_LocObject, RD_LocObject = CalcTarget.FindLocObject("Fire.png", ScreenWindow)
+        LT_LocObject, RD_LocObject = CalcTarget.FindLocObject("Character.png", ScreenWindow)
         LocUnderObject = CalcTarget.GetLockUnderObject(LT_LocObject, RD_LocObject)
         
         if DebugMode == EDebugMode.DEBUG_MODE_ON:
