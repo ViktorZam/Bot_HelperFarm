@@ -1,6 +1,7 @@
 import enum
 import threading
 import BotAction
+import time
 
 class EPriorityAction(enum.Enum):
     
@@ -12,9 +13,10 @@ class PriorityManager:
     
     CheckingHightPriorityAction = False
     lock = None
-    BotLowActions = {}
-    BotMiddleActions = {}
-    BotHightActions = {}
+    BotLowActions = dict[str, BotAction.ActionBase]
+    BotMiddleActions = dict[str, BotAction.ActionBase]
+    BotHightActions = dict[str, BotAction.ActionBase]
+    BotPriorityActions = [BotHightActions, BotMiddleActions, BotLowActions]
     
     def __init__(self):
         self.lock = threading.Lock()
@@ -48,7 +50,42 @@ class PriorityManager:
     def stop(self):
         self.CheckingHightPriorityAction = False
     
+    def ActivateAction(self, NextAction: BotAction.ActionBase):
+        for TypeActions in self.BotPriorityActions:    
+            for Action in TypeActions.values():
+                Action = BotAction.ActionBase(Action)            
+                if Action.ActionIsActive == True:
+                    if NextAction == Action:
+                        Action.start()
+                    else:
+                        Action.stop()
+                           
+    def ChangeStateAllActions(Self, StateAction: BotAction.EStateAction):
+        if StateAction == BotAction.EStateAction.ENABLE:
+            pass                      
+                        
+        
 
     def run(self):
-        pass  
-    
+        while True:
+            
+            time.sleep(1)
+            if self.CheckingHightPriorityAction == False:
+                break
+            
+            
+            ExitFromCheck = False
+            for TypeActions in self.BotPriorityActions:
+                
+                for Action in TypeActions.values():
+                    Action = BotAction.ActionBase(Action)            
+                    if Action.ActionIsActive == True:
+                        ExitFromCheck = True   
+                        break
+                    if Action.ActionIsReady == True:
+                        self.ActivateAction(Action) 
+                        ExitFromCheck = True
+                        break
+                    
+                if ExitFromCheck == True:
+                    break

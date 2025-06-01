@@ -6,6 +6,13 @@ import threading
 import enum
 import PriorityAction
 
+class EStateAction(enum.Enum):
+    
+    DISABLE = 0
+    ENABLE = 1
+
+
+
 class EBotState(enum.Enum):
     
     FOLLOWING = 0

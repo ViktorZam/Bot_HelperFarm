@@ -15,9 +15,10 @@ time.sleep(5)
  
 while True:
     
+    command = input()
+    if command == "stop":
+        
 
-    key = cv.waitKey(1)
-    if  key == ord('q'):
         ActionFollow.stop()
         cv.destroyAllWindows()
         break
