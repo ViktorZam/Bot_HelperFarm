@@ -3,11 +3,13 @@ import time
 import WindowCapture as WinCap
 import CalcTarget
 import keyboard
-import BotAction as bot
+import BotAction
 import PriorityAction
+import BotManagement
 
 TargetManagerObj = CalcTarget.TargetManager()
-PriorityManager = PriorityAction.PriorityManager()  #init bot actions
+PriorityManager = PriorityAction.PriorityManager(TargetManagerObj)  #init bot actions
+#BotManagementObj = BotManagement.Management(PriorityManager)
 #WinCap.PrintAllWindows()
 #CurrentTime = time.time()
 time.sleep(5)
@@ -17,10 +19,15 @@ while True:
     
     command = input()
     if command == "stop":
-        
-
-        ActionFollow.stop()
+        PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)    
+        print("Bot stopped!")
+    elif command == "continue":
+        PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.ENABLE)
+        print("Bot continued!")
+    elif command == ("exit" or "close"):
+        PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)
+        TargetManagerObj.WinCapturing.stop()
         cv.destroyAllWindows()
+        print("Exiting!...")
         break
-    print("Next circle")
         

@@ -21,6 +21,7 @@ class WindowCap:
         self.lock = threading.Lock()
         self.HandleWnd = self.GetWindowHandle()
         self.ScreenWindow = self.GetScreenshot()
+        self.start()
 
     def start(self):
         if self.CaptureIsActive == False:
@@ -80,6 +81,8 @@ class WindowCap:
 
                 img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
                 return img
+            else:
+                print("окно свёрнуто или размер окна слишком мал")
         else:
             self.HandleWnd = self.GetWindowHandle()    
         return None

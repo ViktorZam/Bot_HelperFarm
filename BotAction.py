@@ -4,19 +4,14 @@ import win32gui
 import time
 import threading
 import enum
-import PriorityAction
+import DataPriority
+import CalcTarget
 
-class EStateAction(enum.Enum):
+class EStateCheckAction(enum.Enum):
     
     DISABLE = 0
     ENABLE = 1
 
-
-
-class EBotState(enum.Enum):
-    
-    FOLLOWING = 0
-    LOOTING = 1
 
 class ActionBase:
     
@@ -28,8 +23,10 @@ class ActionBase:
     TargetLoc = None
     LastTargetLoc = None
     Priority = None
+    TargetManager = None
     
-    def __init__(self):
+    def __init__(self, TargetManager:  CalcTarget.TargetManager):
+        self.TargetManager = TargetManager
         self.lock = threading.Lock()
         self.HandleWnd = WinCap.WindowCap.HandleWnd
         self.start_check_ReadyAction()
@@ -68,7 +65,7 @@ class ActionBase:
 class ActionFollow(ActionBase):
 
     RightMouseButton_isDown = False
-    Priority = PriorityAction.EPriorityAction.MIDDLE
+    Priority = DataPriority.EPriorityAction.MIDDLE
 
     def run_check_ReadyAction(self):
          while True:
@@ -77,7 +74,7 @@ class ActionFollow(ActionBase):
             if self.CheckingReadyAction == False:
                 break
             
-            LocObject = self.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png")
             if not LocObject is None:
                 self.ActionIsReady = True
             else:
@@ -95,41 +92,64 @@ class ActionFollow(ActionBase):
             time.sleep(0.1)
             if self.ActionIsActive == False:
                 break
-            if self.TargetLoc:
-                if self.TargetLoc != self.LastTargetLoc:
+            if self.HandleWnd == win32gui.GetForegroundWindow():
+                LocObject = self.TargetManager.FindLocObject("Character.png")
+                if not LocObject is None:
+                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
+                    if self.TargetLoc:
+                        if self.TargetLoc != self.LastTargetLoc:
 
-                    EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+                            EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
 
-                    pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                                     self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
-                    
-                    if self.RightMouseButton_isDown == False:                     
-                        pyautogui.mouseDown(button="Right")
-                        self.RightMouseButton_isDown = True
-                    self.lock.acquire()
-                    self.LastTargetLoc = self.TargetLoc
-                    self.lock.release() 
-                else:
-                    if self.RightMouseButton_isDown == True:
-                        pyautogui.mouseUp(button="Right")
-                        self.RightMouseButton_isDown = False
+                            pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                                            self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                            
+                            if self.RightMouseButton_isDown == False:                     
+                                pyautogui.mouseDown(button="Right")
+                                self.RightMouseButton_isDown = True
+                            self.lock.acquire()
+                            self.LastTargetLoc = self.TargetLoc
+                            self.lock.release() 
+                        else:
+                            if self.RightMouseButton_isDown == True:
+                                pyautogui.mouseUp(button="Right")
+                                self.RightMouseButton_isDown = False
                         
 class ActionLoot(ActionBase):      
     
-    Priority = PriorityAction.EPriorityAction.HIGHT  
-        
+    Priority = DataPriority.EPriorityAction.HIGHT  
+    
+    def run_check_ReadyAction(self):
+         while True:
+            
+            time.sleep(1)
+            if self.CheckingReadyAction == False:
+                break
+            
+            LocObject = self.TargetManager.FindLocLootObject()
+            if not LocObject is None:
+                self.ActionIsReady = True
+            else:
+                self.ActionIsReady = False
+                self.stop()
+ 
     def run(self):
         while True:
             time.sleep(2)
             if self.ActionIsActive == False:
                 break
-            if self.TargetLoc:
-                if self.TargetLoc != self.LastTargetLoc:
-                    print("Local coord Loot: ", self.TargetLoc) 
-                    EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
-                    pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                                 self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
-                    pyautogui.click()
-                    self.lock.acquire()
-                    self.LastTargetLoc = self.TargetLoc
-                    self.lock.release() 
+            
+            if self.HandleWnd == win32gui.GetForegroundWindow():
+                LocObject = self.TargetManager.FindLocLootObject()
+                if not LocObject is None:
+                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+                if self.TargetLoc:
+                    if self.TargetLoc != self.LastTargetLoc:
+                        print("Local coord Loot: ", self.TargetLoc) 
+                        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
+                        pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                                    self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                        pyautogui.click()
+                        self.lock.acquire()
+                        self.LastTargetLoc = self.TargetLoc
+                        self.lock.release() 

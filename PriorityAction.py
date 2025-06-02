@@ -1,31 +1,29 @@
-import enum
 import threading
-import BotAction
 import time
+import BotAction
+import CalcTarget
+import DataPriority
 
-class EPriorityAction(enum.Enum):
-    
-    LOW = 0
-    MIDDLE = 1
-    HIGHT = 2
 
 class PriorityManager:
     
     CheckingHightPriorityAction = False
     lock = None
-    BotLowActions = dict[str, BotAction.ActionBase]
-    BotMiddleActions = dict[str, BotAction.ActionBase]
-    BotHightActions = dict[str, BotAction.ActionBase]
+    BotLowActions = {}
+    BotMiddleActions = {}
+    BotHightActions = {}
     BotPriorityActions = [BotHightActions, BotMiddleActions, BotLowActions]
-    
-    def __init__(self):
+    TargetManager = None
+
+    def __init__(self, TargetManager: CalcTarget.TargetManager):
+        self.TargetManager = TargetManager
         self.lock = threading.Lock()
-        L_BotActions = {"Follow" : BotAction.ActionFollow(),
-                        "Loot" : BotAction.ActionLoot()}
+        L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
+                        "Loot" : BotAction.ActionLoot(self.TargetManager)}
         for index in range(len(L_BotActions)):
             
-            L_ActionNames = L_BotActions.keys()
-            L_Actions = L_BotActions.values()
+            L_ActionNames = list(L_BotActions.keys())
+            L_Actions = list(L_BotActions.values())
             self.AddBotAction(L_ActionNames[index], L_Actions[index])
             
         self.start()
@@ -33,11 +31,11 @@ class PriorityManager:
         
     def AddBotAction(self, NameAction, BotAction: BotAction.ActionBase):
         
-        if BotAction.Priority == EPriorityAction.LOW:
+        if BotAction.Priority == DataPriority.EPriorityAction.LOW:
             self.BotLowActions.update({NameAction : BotAction})
-        elif BotAction.Priority == EPriorityAction.MIDDLE:
+        elif BotAction.Priority == DataPriority.EPriorityAction.MIDDLE:
             self.BotMiddleActions.update({NameAction : BotAction})
-        elif BotAction.Priority == EPriorityAction.HIGHT:
+        elif BotAction.Priority == DataPriority.EPriorityAction.HIGHT:
             self.BotHightActions.update({NameAction : BotAction})
         
 
@@ -60,11 +58,15 @@ class PriorityManager:
                     else:
                         Action.stop()
                            
-    def ChangeStateAllActions(Self, StateAction: BotAction.EStateAction):
-        if StateAction == BotAction.EStateAction.ENABLE:
-            pass                      
-                        
-        
+    def ChangeStateCheckingAllActions(self, StateAction: BotAction.EStateCheckAction):
+        for TypeActions in self.BotPriorityActions:    
+            for Action in TypeActions.values():
+                Action = BotAction.ActionBase(Action)
+                if StateAction == BotAction.EStateCheckAction.ENABLE:
+                    Action.start_check_ReadyAction()
+                elif StateAction == BotAction.EStateCheckAction.DISABLE:
+                    Action.stop()
+                    Action.stop_check_ReadyAction()                     
 
     def run(self):
         while True:
