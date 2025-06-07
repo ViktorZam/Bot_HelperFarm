@@ -28,7 +28,7 @@ class ActionBase:
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         self.TargetManager = TargetManager
         self.lock = threading.Lock()
-        self.HandleWnd = WinCap.WindowCap.HandleWnd
+        self.HandleWnd = self.TargetManager.WinCapturing.HandleWnd
         self.start_check_ReadyAction()
     
     def start_check_ReadyAction(self):
@@ -88,12 +88,13 @@ class ActionFollow(ActionBase):
         
     def run(self):
         while True:
-            
-            time.sleep(0.1)
             if self.ActionIsActive == False:
                 break
+            time.sleep(0.1)
+
             if self.HandleWnd == win32gui.GetForegroundWindow():
                 LocObject = self.TargetManager.FindLocObject("Character.png")
+                
                 if not LocObject is None:
                     self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
                     if self.TargetLoc:

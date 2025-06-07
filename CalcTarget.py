@@ -2,6 +2,7 @@ import cv2 as cv
 import os
 import enum
 import Debug
+import time
 import WindowCapture as WinCap
 
 UNDER_IMG_OFFSET = 110
@@ -67,7 +68,7 @@ class TargetManager:
         if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
             cv.rectangle(self.WinCapturing.ScreenWindow, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)     
             cv.drawMarker(self.WinCapturing.ScreenWindow, TargetLoc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-            cv.imshow("Screen", self.WinCapturing.ScreenWindow)
-
+            #cv.imshow("Screen", self.WinCapturing.ScreenWindow)
+            
         return TargetLoc
             

@@ -18,8 +18,9 @@ class PriorityManager:
     def __init__(self, TargetManager: CalcTarget.TargetManager):
         self.TargetManager = TargetManager
         self.lock = threading.Lock()
-        L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
-                        "Loot" : BotAction.ActionLoot(self.TargetManager)}
+        #L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
+        #                "Loot" : BotAction.ActionLoot(self.TargetManager)}
+        L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager)}
         for index in range(len(L_BotActions)):
             
             L_ActionNames = list(L_BotActions.keys())
@@ -50,18 +51,23 @@ class PriorityManager:
     
     def ActivateAction(self, NextAction: BotAction.ActionBase):
         for TypeActions in self.BotPriorityActions:    
-            for Action in TypeActions.values():
-                Action = BotAction.ActionBase(Action)            
+            for Action in TypeActions.values():           
                 if Action.ActionIsActive == True:
+                    if NextAction != Action:
+                        Action.stop()
+                    else:
+                        #print("Next action is active - ", Action)
+                        pass
+
+                else:
                     if NextAction == Action:
                         Action.start()
-                    else:
-                        Action.stop()
+                        #print("Next action - ", Action)
+                        
                            
     def ChangeStateCheckingAllActions(self, StateAction: BotAction.EStateCheckAction):
         for TypeActions in self.BotPriorityActions:    
             for Action in TypeActions.values():
-                Action = BotAction.ActionBase(Action)
                 if StateAction == BotAction.EStateCheckAction.ENABLE:
                     Action.start_check_ReadyAction()
                 elif StateAction == BotAction.EStateCheckAction.DISABLE:
@@ -75,19 +81,21 @@ class PriorityManager:
             if self.CheckingHightPriorityAction == False:
                 break
             
-            
-            ExitFromCheck = False
+            L_ExitFromCheck = False
             for TypeActions in self.BotPriorityActions:
-                
+ 
                 for Action in TypeActions.values():
-                    Action = BotAction.ActionBase(Action)            
+                                
                     if Action.ActionIsActive == True:
-                        ExitFromCheck = True   
+                        L_ExitFromCheck = True
+                        #print("action is active: ", Action.Priority, " - ", Action)   
                         break
                     if Action.ActionIsReady == True:
                         self.ActivateAction(Action) 
-                        ExitFromCheck = True
+                        L_ExitFromCheck = True
+                        #print("action is ready: ", Action.Priority, " - ", Action)    
                         break
                     
-                if ExitFromCheck == True:
+                if L_ExitFromCheck == True:
                     break
+            #print("------------------------")

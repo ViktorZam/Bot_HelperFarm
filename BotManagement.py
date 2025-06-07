@@ -11,11 +11,13 @@ class Management:
     ManagementIsActive = False
     lock = None
     PriorityManager = None
+    BotIsActive = None
 
     def __init__(self, PriorityManager: PriorityAction.PriorityManager):
         self.PriorityManager = PriorityManager
         self.lock = threading.Lock()
-        self.HandleWnd = WinCap.WindowCap.HandleWnd
+        self.HandleWnd = PriorityManager.TargetManager.WinCapturing.HandleWnd
+        self.BotIsActive = True
         self.start()
       
     def start(self):
@@ -34,5 +36,13 @@ class Management:
                 break
             
             if self.HandleWnd != win32gui.GetForegroundWindow():
-                self.PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)
-            
+                if self.BotIsActive == True:
+                    self.BotIsActive = False
+                    self.PriorityManager.stop()
+                    self.PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)
+                    
+            else:
+                if self.BotIsActive == False:                   
+                    self.BotIsActive = True
+                    self.PriorityManager.start()
+                    self.PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.ENABLE)

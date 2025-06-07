@@ -69,7 +69,7 @@ class WindowCap:
                 memdc.SelectObject(bmp)
 
                 windll.user32.PrintWindow(self.HandleWnd, memdc.GetSafeHdc(), 3)
-
+                
                 signedIntsArray = bmp.GetBitmapBits(True)
                 img = numpy.fromstring(signedIntsArray, dtype='uint8')
                 img.shape = (height,width,4)
@@ -80,10 +80,11 @@ class WindowCap:
                 win32gui.DeleteObject(bmp.GetHandle())
 
                 img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
+                cv.imshow("Screen", img)
                 return img
             else:
                 print("окно свёрнуто или размер окна слишком мал")
-        else:
+        else:          
             self.HandleWnd = self.GetWindowHandle()    
         return None
             
