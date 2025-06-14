@@ -26,14 +26,14 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath)
+            LocObject = self.FindLocObject(LootPath, 0.9)
             if not LocObject is None:
                 break
         
         return LocObject
 
 
-    def FindLocObject(self, DesObject_img_path):
+    def FindLocObject(self, DesObject_img_path, ValueMatching):
         
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
         #cv.imwrite("123.png", DesObject_img)
@@ -45,7 +45,7 @@ class TargetManager:
             #cv.waitKey(1000)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
             print(MaxValMatch, "///", DesObject_img_path)
-            if MaxValMatch >= 0.9:#0.7
+            if MaxValMatch >= ValueMatching:#0.7
             
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
                 SizeHChar_img = DesObject_img.shape[0]

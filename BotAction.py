@@ -74,7 +74,7 @@ class ActionFollow(ActionBase):
             if self.CheckingReadyAction == False:
                 break
             
-            LocObject = self.TargetManager.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png", 0.7)
             if not LocObject is None:
                 self.ActionIsReady = True
             else:
@@ -92,7 +92,7 @@ class ActionFollow(ActionBase):
                 break
             time.sleep(0.1) #0.1
 
-            LocObject = self.TargetManager.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png", 0.7)
                 
             if not LocObject is None:
                 self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
