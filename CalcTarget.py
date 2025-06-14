@@ -26,7 +26,7 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath, 0.9)
+            LocObject = self.FindLocObject(LootPath, 0.94)
             if not LocObject is None:
                 break
         

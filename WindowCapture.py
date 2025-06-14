@@ -54,6 +54,7 @@ class WindowCap:
                 cv.rectangle(L_ScreenWindow, self.LT_ObjectLoc, self.RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)     
                 cv.drawMarker(L_ScreenWindow, self.TargetLoc, color=(255,0,255), markerType=cv.MARKER_CROSS)
                 cv.imshow("Screen", L_ScreenWindow)
+                cv.imwrite("Screen0.png", L_ScreenWindow)
                 cv.waitKey(1) 
             
 

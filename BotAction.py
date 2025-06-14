@@ -145,7 +145,7 @@ class ActionLoot(ActionBase):
                 self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
             if self.TargetLoc:
                 if self.TargetLoc != self.LastTargetLoc:
-                    print("Local coord Loot: ", self.TargetLoc) 
+                    #print("Local coord Loot: ", self.TargetLoc) 
                     EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
                     pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
                                     self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)

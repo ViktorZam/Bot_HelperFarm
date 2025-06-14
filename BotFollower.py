@@ -7,12 +7,13 @@ import BotAction
 import PriorityAction
 import BotManagement
 
+time.sleep(5)
 TargetManagerObj = CalcTarget.TargetManager()
 PriorityManager = PriorityAction.PriorityManager(TargetManagerObj)  #init bot actions
-#BotManagementObj = BotManagement.Management(PriorityManager)
+BotManagementObj = BotManagement.Management(PriorityManager)
 #WinCap.PrintAllWindows()
 #CurrentTime = time.time()
-time.sleep(5)
+
 
  
 while True:
@@ -25,8 +26,8 @@ while True:
         PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.ENABLE)
         print("Bot continued!")
     elif command == ("exit" or "close"):
-        #if BotManagementObj.BotIsActive == True:
-            #PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)
+        if BotManagementObj.BotIsActive == True:
+            PriorityManager.ChangeStateCheckingAllActions(BotAction.EStateCheckAction.DISABLE)
         TargetManagerObj.WinCapturing.stop()
         cv.destroyAllWindows()
         print("Exiting!...")
