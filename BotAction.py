@@ -125,8 +125,8 @@ class ActionLoot(ActionBase):
             time.sleep(1)
             if self.CheckingReadyAction == False:
                 break
-            
             LocObject = self.TargetManager.FindLocLootObject()
+            #print(LocObject)
             if not LocObject is None:
                 self.ActionIsReady = True
             else:
@@ -139,17 +139,17 @@ class ActionLoot(ActionBase):
             if self.ActionIsActive == False:
                 break
             
-            if self.HandleWnd == win32gui.GetForegroundWindow():
-                LocObject = self.TargetManager.FindLocLootObject()
-                if not LocObject is None:
-                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-                if self.TargetLoc:
-                    if self.TargetLoc != self.LastTargetLoc:
-                        print("Local coord Loot: ", self.TargetLoc) 
-                        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
-                        pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+            LocObject = self.TargetManager.FindLocLootObject()
+            #print (LocObject)
+            if not LocObject is None:
+                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            if self.TargetLoc:
+                if self.TargetLoc != self.LastTargetLoc:
+                    print("Local coord Loot: ", self.TargetLoc) 
+                    EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
+                    pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
                                     self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
-                        pyautogui.click()
-                        self.lock.acquire()
-                        self.LastTargetLoc = self.TargetLoc
-                        self.lock.release() 
+                    pyautogui.click()
+                    self.lock.acquire()
+                    self.LastTargetLoc = self.TargetLoc
+                    self.lock.release() 

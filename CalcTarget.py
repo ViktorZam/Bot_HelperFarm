@@ -36,13 +36,16 @@ class TargetManager:
     def FindLocObject(self, DesObject_img_path):
         
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
+        #cv.imwrite("123.png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
-        
         if not self.WinCapturing.ScreenWindow is None:
-            ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, cv.TM_CCOEFF_NORMED)
-
+            ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, cv.TM_CCORR_NORMED)# TM_CCOEFF_NORMED
+            #cv.imwrite(str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+            #cv.imshow("Screen", ResultMatch_img)
+            #cv.waitKey(5000)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            if MaxValMatch >= 0.7:
+            print(MaxValMatch, "///", DesObject_img_path)
+            if MaxValMatch >= 0.92:#0.7
             
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
                 SizeHChar_img = DesObject_img.shape[0]
