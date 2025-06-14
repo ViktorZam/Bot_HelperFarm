@@ -90,31 +90,30 @@ class ActionFollow(ActionBase):
         while True:
             if self.ActionIsActive == False:
                 break
-            time.sleep(0.1)
+            time.sleep(0.1) #0.1
 
-            if self.HandleWnd == win32gui.GetForegroundWindow():
-                LocObject = self.TargetManager.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png")
                 
-                if not LocObject is None:
-                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
-                    if self.TargetLoc:
-                        if self.TargetLoc != self.LastTargetLoc:
+            if not LocObject is None:
+                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
+                if self.TargetLoc:
+                    if self.TargetLoc != self.LastTargetLoc:
 
-                            EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+                        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
 
-                            pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                        pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
                                             self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
                             
-                            if self.RightMouseButton_isDown == False:                     
-                                pyautogui.mouseDown(button="Right")
-                                self.RightMouseButton_isDown = True
-                            self.lock.acquire()
-                            self.LastTargetLoc = self.TargetLoc
-                            self.lock.release() 
-                        else:
-                            if self.RightMouseButton_isDown == True:
-                                pyautogui.mouseUp(button="Right")
-                                self.RightMouseButton_isDown = False
+                        if self.RightMouseButton_isDown == False:                     
+                            pyautogui.mouseDown(button="Right")
+                            self.RightMouseButton_isDown = True
+                        self.lock.acquire()
+                        self.LastTargetLoc = self.TargetLoc
+                        self.lock.release() 
+                    else:
+                        if self.RightMouseButton_isDown == True:
+                            pyautogui.mouseUp(button="Right")
+                            self.RightMouseButton_isDown = False
                         
 class ActionLoot(ActionBase):      
     

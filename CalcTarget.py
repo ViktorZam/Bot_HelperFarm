@@ -66,9 +66,7 @@ class TargetManager:
             TargetLoc = (int(RD_ObjectLoc[0] - SizeWObject/2), int(RD_ObjectLoc[1] - SizeHObject/2))
     
         if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
-            cv.rectangle(self.WinCapturing.ScreenWindow, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)     
-            cv.drawMarker(self.WinCapturing.ScreenWindow, TargetLoc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-            #cv.imshow("Screen", self.WinCapturing.ScreenWindow)
-            
+            self.WinCapturing.SetDebugLocs(LT_ObjectLoc, RD_ObjectLoc, TargetLoc)
+          
         return TargetLoc
             

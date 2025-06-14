@@ -5,6 +5,7 @@ from ctypes import windll
 import pyautogui
 import threading
 import time
+import Debug
 
 NAME_WINDOW = "Path of Exile 2"
 BORDER_PIXELS_SIZE = 8
@@ -16,6 +17,9 @@ class WindowCap:
     CaptureIsActive = False
     lock = None
     ScreenWindow = None
+    LT_ObjectLoc = None
+    RD_ObjectLoc = None
+    TargetLoc = None
     
     def __init__(self):
         self.lock = threading.Lock()
@@ -31,13 +35,27 @@ class WindowCap:
 
     def stop(self):
         self.CaptureIsActive = False       
+    
+    def SetDebugLocs(self, LT_ObjectLoc, RD_ObjectLoc, TargetLoc):
+        self.LT_ObjectLoc = LT_ObjectLoc
+        self.RD_ObjectLoc = RD_ObjectLoc
+        self.TargetLoc = TargetLoc
         
     def run(self):
         while True:
-            time.sleep(0.1)
+            time.sleep(0.1) #0.1
             if self.CaptureIsActive == False:
                 break
+            self.lock.acquire()
             self.ScreenWindow = self.GetScreenshot()
+            self.lock.release()
+            if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
+                L_ScreenWindow = self.ScreenWindow
+                cv.rectangle(L_ScreenWindow, self.LT_ObjectLoc, self.RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)     
+                cv.drawMarker(L_ScreenWindow, self.TargetLoc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+                cv.imshow("Screen", L_ScreenWindow)
+                cv.waitKey(1) 
+            
 
 
     def GetWindowHandle(self):
@@ -62,30 +80,34 @@ class WindowCap:
             
             hwindc = win32gui.GetWindowDC(self.HandleWnd)
             srcdc = win32ui.CreateDCFromHandle(hwindc)
-            memdc = srcdc.CreateCompatibleDC()
-            bmp = win32ui.CreateBitmap()
-            if width >=800:
-                bmp.CreateCompatibleBitmap(srcdc, width, height)
-                memdc.SelectObject(bmp)
+            if not srcdc is None:
+                memdc = srcdc.CreateCompatibleDC()
+                bmp = win32ui.CreateBitmap()
+                if width >=800:
+                    #print(bmp, "///", width, "///", height)
+                    bmp.CreateCompatibleBitmap(srcdc, width, height)
+                    memdc.SelectObject(bmp)
 
-                windll.user32.PrintWindow(self.HandleWnd, memdc.GetSafeHdc(), 3)
+                    windll.user32.PrintWindow(self.HandleWnd, memdc.GetSafeHdc(), 3)
                 
-                signedIntsArray = bmp.GetBitmapBits(True)
-                img = numpy.fromstring(signedIntsArray, dtype='uint8')
-                img.shape = (height,width,4)
+                    signedIntsArray = bmp.GetBitmapBits(True)
+                    img = numpy.fromstring(signedIntsArray, dtype='uint8')
+                    img.shape = (height,width,4)
 
-                srcdc.DeleteDC()
-                memdc.DeleteDC()
-                win32gui.ReleaseDC(self.HandleWnd, hwindc)
-                win32gui.DeleteObject(bmp.GetHandle())
+                    srcdc.DeleteDC()
+                    memdc.DeleteDC()
+                    win32gui.ReleaseDC(self.HandleWnd, hwindc)
+                    win32gui.DeleteObject(bmp.GetHandle())
 
-                img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
-                cv.imshow("Screen", img)
-                return img
+                    img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
+                    return img
+                else:
+                    print("окно свёрнуто или размер окна слишком мал")
             else:
-                print("окно свёрнуто или размер окна слишком мал")
-        else:          
-            self.HandleWnd = self.GetWindowHandle()    
+                self.lock.acquire()
+                self.HandleWnd = self.GetWindowHandle()
+                self.lock.release()          
+                
         return None
             
 
