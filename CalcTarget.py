@@ -26,7 +26,7 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath, 0.9)
+            LocObject = self.FindLocObject(LootPath, 0.77)
             if not LocObject is None:
                 break
         
@@ -44,7 +44,7 @@ class TargetManager:
             #cv.imshow("Screen", ResultMatch_img)
             #cv.waitKey(1000)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            #print(MaxValMatch, "///", DesObject_img_path)
+            print(MaxValMatch, "///", DesObject_img_path)
             if MaxValMatch >= ValueMatching:#0.7
             
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
