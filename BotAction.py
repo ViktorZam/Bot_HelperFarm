@@ -6,6 +6,7 @@ import threading
 import enum
 import DataPriority
 import CalcTarget
+import cv2 as cv
 
 class EStateCheckAction(enum.Enum):
     
@@ -74,7 +75,7 @@ class ActionFollow(ActionBase):
             if self.CheckingReadyAction == False:
                 break
             
-            LocObject = self.TargetManager.FindLocObject("Character.png", 0.7)
+            LocObject = self.TargetManager.FindLocObject("Character.png")
             if not LocObject is None:
                 self.ActionIsReady = True
             else:
@@ -92,8 +93,7 @@ class ActionFollow(ActionBase):
                 break
             time.sleep(0.1) #0.1
 
-            LocObject = self.TargetManager.FindLocObject("Character.png", 0.7)
-                
+            LocObject = self.TargetManager.FindLocObject("Character.png")   
             if not LocObject is None:
                 self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
                 if self.TargetLoc:

@@ -26,26 +26,31 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath, 0.77)
+            LocObject = self.FindLocObject(LootPath, 0.9, cv.TM_CCORR_NORMED)
             if not LocObject is None:
                 break
         
         return LocObject
 
 
-    def FindLocObject(self, DesObject_img_path, ValueMatching):
+    def FindLocObject(self, DesObject_img_path, ValueMatching=0.9, Encoder=cv.TM_CCORR_NORMED):
         
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
-        #cv.imwrite("123.png", DesObject_img)
+        #cv.imwrite(str(time.time()) + ".png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
         if not self.WinCapturing.ScreenWindow is None:
-            ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, cv.TM_CCOEFF_NORMED)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
-            #cv.imwrite(str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+            ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, Encoder)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
+            #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
+            MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
+            #print(MaxValMatch, "///", DesObject_img_path)
+            #LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
+            #SizeHChar_img = DesObject_img.shape[0]
+            #SizeWChar_img = DesObject_img.shape[1]   
+            #RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
+            #cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
             #cv.imshow("Screen", ResultMatch_img)
             #cv.waitKey(1000)
-            MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            print(MaxValMatch, "///", DesObject_img_path)
-            if MaxValMatch >= ValueMatching:#0.7
+            if MaxValMatch >= ValueMatching:#0.9
             
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
                 SizeHChar_img = DesObject_img.shape[0]
@@ -54,6 +59,8 @@ class TargetManager:
                 RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
                 
                 return LT_ObjectLoc, RD_ObjectLoc
+            else:
+                return None
         return None
         
     def GetTargetLoc(self, LocOrient: ELocOrient, LocObject): 
