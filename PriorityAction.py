@@ -21,6 +21,7 @@ class PriorityManager:
         L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
                         "Loot" : BotAction.ActionLoot(self.TargetManager)}
         #L_BotActions = {"Loot" : BotAction.ActionLoot(self.TargetManager)}
+        #L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager)}
         for index in range(len(L_BotActions)):
             
             L_ActionNames = list(L_BotActions.keys())

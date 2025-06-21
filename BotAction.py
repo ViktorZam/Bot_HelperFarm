@@ -93,16 +93,19 @@ class ActionFollow(ActionBase):
                 break
             time.sleep(0.1) #0.1
 
-            LocObject = self.TargetManager.FindLocObject("Character.png")   
+            LocObject = self.TargetManager.FindLocObject("Character.png")
+            #print(LocObject)   
             if not LocObject is None:
                 self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
                 if self.TargetLoc:
                     if self.TargetLoc != self.LastTargetLoc:
 
-                        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+                        #EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
 
-                        pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                                            self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                        #pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                        #                    self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                        pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1])
+                        #print(self.TargetLoc)
                             
                         if self.RightMouseButton_isDown == False:                     
                             pyautogui.mouseDown(button="Right")
@@ -135,7 +138,6 @@ class ActionLoot(ActionBase):
  
     def run(self):
         while True:
-            time.sleep(2)
             if self.ActionIsActive == False:
                 break
             
@@ -146,10 +148,14 @@ class ActionLoot(ActionBase):
             if self.TargetLoc:
                 if self.TargetLoc != self.LastTargetLoc:
                     #print("Local coord Loot: ", self.TargetLoc) 
-                    EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)  
-                    pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                                    self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                    #EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+                    pyautogui.mouseUp(button="Right")  
+                    #pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                    #                self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
+                    pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1])
                     pyautogui.click()
+                    #print(self.TargetLoc)
                     self.lock.acquire()
                     self.LastTargetLoc = self.TargetLoc
                     self.lock.release() 
+            time.sleep(2)

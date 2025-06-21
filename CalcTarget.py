@@ -4,6 +4,8 @@ import enum
 import Debug
 import time
 import WindowCapture as WinCap
+import numpy
+import win32gui
 
 UNDER_IMG_OFFSET = 110
 
@@ -26,14 +28,14 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath, 0.9, cv.TM_CCORR_NORMED)
+            LocObject = self.FindLocObject(LootPath, cv.TM_CCORR_NORMED)
             if not LocObject is None:
                 break
         
         return LocObject
 
 
-    def FindLocObject(self, DesObject_img_path, ValueMatching=0.9, Encoder=cv.TM_CCORR_NORMED):
+    def FindLocObject(self, DesObject_img_path, ValueMatching=0.94, Encoder=cv.TM_CCORR_NORMED):
         
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
         #cv.imwrite(str(time.time()) + ".png", DesObject_img)
@@ -43,13 +45,17 @@ class TargetManager:
             #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
             #print(MaxValMatch, "///", DesObject_img_path)
+            ##################### Debug BEGIN
             #LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
             #SizeHChar_img = DesObject_img.shape[0]
             #SizeWChar_img = DesObject_img.shape[1]   
             #RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
             #cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
+            #ResultMatch_img = (ResultMatch_img * 255).astype(numpy.uint8) #for TM_CCORR_NORMED
+            #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             #cv.imshow("Screen", ResultMatch_img)
             #cv.waitKey(1000)
+            #################### Debug END
             if MaxValMatch >= ValueMatching:#0.9
             
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
@@ -77,6 +83,13 @@ class TargetManager:
     
         if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
             self.WinCapturing.SetDebugLocs(LT_ObjectLoc, RD_ObjectLoc, TargetLoc)
-          
+            
+        EdgesWindow = win32gui.GetWindowRect(self.WinCapturing.HandleWnd)
+        TargetLoc = (TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                     TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)    
+            
+        if (TargetLoc[0] > EdgesWindow[2]) or (TargetLoc[1] > EdgesWindow[3]):
+            return None
+
         return TargetLoc
             
