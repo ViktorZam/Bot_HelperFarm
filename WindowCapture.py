@@ -104,6 +104,7 @@ class WindowCap:
                     return img
                 else:
                     print("окно свёрнуто или размер окна слишком мал")
+                    time.sleep(2)
             else:
                 self.lock.acquire()
                 self.HandleWnd = self.GetWindowHandle()

@@ -75,7 +75,7 @@ class ActionFollow(ActionBase):
             if self.CheckingReadyAction == False:
                 break
             
-            LocObject = self.TargetManager.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png", 0.71)
             if not LocObject is None:
                 self.ActionIsReady = True
             else:
@@ -85,7 +85,8 @@ class ActionFollow(ActionBase):
     def stop(self):
         super().stop()
         pyautogui.mouseUp(button="Right")
-        self.RightMouseButton_isDown = False       
+        self.RightMouseButton_isDown = False 
+        #print("Hello")      
         
     def run(self):
         while True:
@@ -93,22 +94,18 @@ class ActionFollow(ActionBase):
                 break
             time.sleep(0.1) #0.1
 
-            LocObject = self.TargetManager.FindLocObject("Character.png")
+            LocObject = self.TargetManager.FindLocObject("Character.png", 0.71)
             #print(LocObject)   
             if not LocObject is None:
-                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.UNDER, LocObject)
+                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
                 if self.TargetLoc:
                     if self.TargetLoc != self.LastTargetLoc:
-
-                        #EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
-
-                        #pyautogui.moveTo(self.TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                        #                    self.TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)
                         pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1])
                         #print(self.TargetLoc)
                             
                         if self.RightMouseButton_isDown == False:                     
                             pyautogui.mouseDown(button="Right")
+                            #print("123")
                             self.RightMouseButton_isDown = True
                         self.lock.acquire()
                         self.LastTargetLoc = self.TargetLoc
@@ -124,8 +121,7 @@ class ActionLoot(ActionBase):
     
     def run_check_ReadyAction(self):
          while True:
-            
-            time.sleep(1)
+
             if self.CheckingReadyAction == False:
                 break
             LocObject = self.TargetManager.FindLocLootObject()
@@ -135,7 +131,8 @@ class ActionLoot(ActionBase):
             else:
                 self.ActionIsReady = False
                 self.stop()
- 
+            time.sleep(0.5)
+            
     def run(self):
         while True:
             if self.ActionIsActive == False:
@@ -158,4 +155,4 @@ class ActionLoot(ActionBase):
                     self.lock.acquire()
                     self.LastTargetLoc = self.TargetLoc
                     self.lock.release() 
-            time.sleep(2)
+            time.sleep(1)

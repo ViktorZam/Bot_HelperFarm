@@ -4,7 +4,8 @@ import time
 import win32gui
 import PriorityAction
 import BotAction
-
+import enum    
+        
 class Management:
     
     HandleWnd = None

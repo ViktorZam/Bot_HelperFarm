@@ -3,6 +3,13 @@ import time
 import BotAction
 import CalcTarget
 import DataPriority
+import sys
+import strenum
+
+class EBotActions(strenum.StrEnum):
+    
+    FOLLOW = "FOLLOW"
+    LOOT = "LOOT" 
 
 
 class PriorityManager:
@@ -14,14 +21,27 @@ class PriorityManager:
     BotHightActions = {}
     BotPriorityActions = [BotHightActions, BotMiddleActions, BotLowActions]
     TargetManager = None
-
+    
     def __init__(self, TargetManager: CalcTarget.TargetManager):
+        
         self.TargetManager = TargetManager
         self.lock = threading.Lock()
-        L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
-                        "Loot" : BotAction.ActionLoot(self.TargetManager)}
+        L_BotActions = {}
+        L_argv = sys.argv
+        L_argv.pop(0)
+        
+        for arg in L_argv:
+            if (arg == EBotActions.FOLLOW):
+                L_BotActions.update(FOLLOW = BotAction.ActionFollow(self.TargetManager))
+            elif (arg == EBotActions.LOOT):
+                L_BotActions.update(LOOT = BotAction.ActionLoot(self.TargetManager))
+        print("123")
+        print(L_BotActions)
+        #L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
+                        #"Loot" : BotAction.ActionLoot(self.TargetManager)}
         #L_BotActions = {"Loot" : BotAction.ActionLoot(self.TargetManager)}
         #L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager)}
+        
         for index in range(len(L_BotActions)):
             
             L_ActionNames = list(L_BotActions.keys())
@@ -51,11 +71,13 @@ class PriorityManager:
         self.CheckingHightPriorityAction = False
     
     def ActivateAction(self, NextAction: BotAction.ActionBase):
+        #print(NextAction)
         for TypeActions in self.BotPriorityActions:    
             for Action in TypeActions.values():           
                 if Action.ActionIsActive == True:
                     if NextAction != Action:
                         Action.stop()
+                        #print("action is stoped - ", Action)
                     else:
                         #print("Next action is active - ", Action)
                         pass
@@ -77,16 +99,14 @@ class PriorityManager:
 
     def run(self):
         while True:
-            
-            time.sleep(1)
             if self.CheckingHightPriorityAction == False:
                 break
             
             L_ExitFromCheck = False
             for TypeActions in self.BotPriorityActions:
- 
+                
                 for Action in TypeActions.values():
-                                
+                    #print(Action)            
                     if Action.ActionIsActive == True:
                         L_ExitFromCheck = True
                         #print("action is active: ", Action.Priority, " - ", Action)   
@@ -99,4 +119,5 @@ class PriorityManager:
                     
                 if L_ExitFromCheck == True:
                     break
+            time.sleep(0.5)
             #print("------------------------")

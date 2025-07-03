@@ -28,7 +28,7 @@ class TargetManager:
 
     def FindLocLootObject(self):
         for LootPath in self.LootImgNames:
-            LocObject = self.FindLocObject(LootPath, cv.TM_CCORR_NORMED)
+            LocObject = self.FindLocObject(LootPath)
             if not LocObject is None:
                 break
         
@@ -57,7 +57,7 @@ class TargetManager:
             #cv.waitKey(1000)
             #################### Debug END
             if MaxValMatch >= ValueMatching:#0.9
-            
+                #print(MaxValMatch, "///", DesObject_img_path)
                 LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
                 SizeHChar_img = DesObject_img.shape[0]
                 SizeWChar_img = DesObject_img.shape[1]
@@ -88,7 +88,7 @@ class TargetManager:
         TargetLoc = (TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
                      TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)    
             
-        if (TargetLoc[0] > EdgesWindow[2]) or (TargetLoc[1] > EdgesWindow[3]):
+        if (TargetLoc[0] > EdgesWindow[2]) or (TargetLoc[1] > EdgesWindow[3]) or (TargetLoc[0] < EdgesWindow[0]) or (TargetLoc[1] < EdgesWindow[1]):
             return None
 
         return TargetLoc
