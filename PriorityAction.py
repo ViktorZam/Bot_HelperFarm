@@ -35,8 +35,7 @@ class PriorityManager:
                 L_BotActions.update(FOLLOW = BotAction.ActionFollow(self.TargetManager))
             elif (arg == EBotActions.LOOT):
                 L_BotActions.update(LOOT = BotAction.ActionLoot(self.TargetManager))
-        print("123")
-        print(L_BotActions)
+
         #L_BotActions = {"Follow" : BotAction.ActionFollow(self.TargetManager),
                         #"Loot" : BotAction.ActionLoot(self.TargetManager)}
         #L_BotActions = {"Loot" : BotAction.ActionLoot(self.TargetManager)}
