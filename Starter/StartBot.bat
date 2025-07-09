@@ -1,3 +1,3 @@
 cd ..
-.venv\Scripts\python BotFollower.py LOOT FOLLOW
+.venv\Scripts\python PriorityBot.py LOOT FOLLOW
 pause

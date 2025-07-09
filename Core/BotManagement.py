@@ -1,9 +1,9 @@
 import threading
-import WindowCapture as WinCap
+from Core import WindowCapture as WinCap
 import time
 import win32gui
-import PriorityAction
-import BotAction
+from Core import PriorityAction
+from Core import BotAction
 import enum    
         
 class Management:

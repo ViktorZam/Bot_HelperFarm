@@ -5,11 +5,18 @@ from ctypes import windll
 import pyautogui
 import threading
 import time
-import Debug
+from Core import Debug
+import enum
 
 NAME_WINDOW = "Path of Exile 2"
 BORDER_PIXELS_SIZE = 8
 TITLEBAR_PIXELS_SIZE = 30
+
+class ETypeScreening(enum.Enum):
+    
+    AUTO = 0
+    MANUAL = 1
+
 
 class WindowCap:
     
@@ -20,12 +27,15 @@ class WindowCap:
     LT_ObjectLoc = None
     RD_ObjectLoc = None
     TargetLoc = None
+    TypeScreening = None
     
-    def __init__(self):
+    def __init__(self, TypeScreening: ETypeScreening = ETypeScreening.AUTO):
         self.lock = threading.Lock()
         self.HandleWnd = self.GetWindowHandle()
         self.ScreenWindow = self.GetScreenshot()
-        self.start()
+        self.TypeScreening = TypeScreening
+        if (self.TypeScreening == ETypeScreening.AUTO):
+            self.start()
 
     def start(self):
         if self.CaptureIsActive == False:
@@ -46,9 +56,7 @@ class WindowCap:
             time.sleep(0.1) #0.1
             if self.CaptureIsActive == False:
                 break
-            self.lock.acquire()
-            self.ScreenWindow = self.GetScreenshot()
-            self.lock.release()
+            self.UpdateScreenshot()
             if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
                 L_ScreenWindow = self.ScreenWindow
                 cv.rectangle(L_ScreenWindow, self.LT_ObjectLoc, self.RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)     
@@ -56,8 +64,12 @@ class WindowCap:
                 #cv.imshow("Screen", L_ScreenWindow)
                 cv.imwrite("Debug/" + str(time.time()) + ".png", L_ScreenWindow)
                 #cv.waitKey(1) 
-            
-
+    
+    def UpdateScreenshot(self):
+        self.lock.acquire()
+        self.ScreenWindow = self.GetScreenshot()
+        self.lock.release()
+        time.sleep(0.1)                
 
     def GetWindowHandle(self):
         L_HandleWnd = win32gui.FindWindow(None, NAME_WINDOW)

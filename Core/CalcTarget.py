@@ -1,26 +1,33 @@
 import cv2 as cv 
 import os
 import enum
-import Debug
+from Core import Debug
 import time
-import WindowCapture as WinCap
+from Core import WindowCapture as WinCap
 import numpy
 import win32gui
 
 UNDER_IMG_OFFSET = 110
+XY_OFFSET_LEFT_WITHDRAWN = (278, 302) # for 1024x768
+XY_OFFSET_RIGHT_WITHDRAWN = (459, 302)
 
 class ELocOrient(enum.Enum):
     
     UNDER = 0
     CENTER = 1
+
+class ESideWithdrawn(enum.Enum):
+    
+    LEFT = 0
+    RIGHT = 1
        
 class TargetManager:
     LootImgNames = None
     DebugMode = None
     WinCapturing = None
        
-    def __init__(self): 
-        self.WinCapturing = WinCap.WindowCap()     
+    def __init__(self, TypeScreening: WinCap.ETypeScreening = WinCap.ETypeScreening.AUTO): 
+        self.WinCapturing = WinCap.WindowCap(TypeScreening)     
         self.LootImgNames = os.listdir("Loot")
         for index in range(len(self.LootImgNames)):
             self.LootImgNames[index] = "Loot/" + self.LootImgNames[index]
@@ -40,6 +47,9 @@ class TargetManager:
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
         #cv.imwrite(str(time.time()) + ".png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
+        if (self.WinCapturing.TypeScreening == WinCap.ETypeScreening.MANUAL):
+            self.WinCapturing.UpdateScreenshot()
+        
         if not self.WinCapturing.ScreenWindow is None:
             ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, Encoder)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
             #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
@@ -92,4 +102,19 @@ class TargetManager:
             return None
 
         return TargetLoc
-            
+    
+    def GetLocWithdrawn(self, SideWithdrawn: ESideWithdrawn): 
+        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+        EdgesWindow = list(EdgesWindow)
+        EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE
+        EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE 
+        
+        if (SideWithdrawn == ESideWithdrawn.LEFT):
+            EdgesWindow[0] = EdgesWindow[0] + XY_OFFSET_LEFT_WITHDRAWN[0]
+            EdgesWindow[1] = EdgesWindow[1] + XY_OFFSET_LEFT_WITHDRAWN[1]
+        elif (SideWithdrawn == ESideWithdrawn.RIGHT):
+            EdgesWindow[0] = EdgesWindow[0] + XY_OFFSET_RIGHT_WITHDRAWN[0]
+            EdgesWindow[1] = EdgesWindow[1] + XY_OFFSET_RIGHT_WITHDRAWN[1]
+         
+        Loc = (EdgesWindow[0], EdgesWindow[1])   
+        return Loc

@@ -1,11 +1,11 @@
-import WindowCapture as WinCap
+from Core import WindowCapture as WinCap
 import pyautogui
 import win32gui
 import time
 import threading
 import enum
-import DataPriority
-import CalcTarget
+from Core import DataPriority
+from Core import CalcTarget
 import cv2 as cv
 
 class EStateCheckAction(enum.Enum):
@@ -18,31 +18,15 @@ class ActionBase:
     
     HandleWnd = None
     ActionIsActive = False
-    CheckingReadyAction = False
-    ActionIsReady = False
     lock = None
     TargetLoc = None
     LastTargetLoc = None
-    Priority = None
     TargetManager = None
     
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         self.TargetManager = TargetManager
         self.lock = threading.Lock()
         self.HandleWnd = self.TargetManager.WinCapturing.HandleWnd
-        self.start_check_ReadyAction()
-    
-    def start_check_ReadyAction(self):
-        if self.CheckingReadyAction == False:
-            self.CheckingReadyAction = True
-            tCheckingReadyAction = threading.Thread(target=self.run_check_ReadyAction, daemon=True)
-            tCheckingReadyAction.start()
-    
-    def run_check_ReadyAction(self):
-        pass
-    
-    def stop_check_ReadyAction(self):
-        self.CheckingReadyAction = False
     
     def UpdateTargetLoc(self, Target: tuple[int, int]):
         self.lock.acquire()
@@ -62,8 +46,30 @@ class ActionBase:
     def run(self):
         pass
 
+class ActionCheckReady(ActionBase):
+    
+    CheckingReadyAction = False
+    ActionIsReady = False
+    Priority = None
+    
+    def __init__(self, TargetManager:  CalcTarget.TargetManager):
+        super().__init__(TargetManager)
+        self.start_check_ReadyAction()
+        
+    def start_check_ReadyAction(self):
+        if self.CheckingReadyAction == False:
+            self.CheckingReadyAction = True
+            tCheckingReadyAction = threading.Thread(target=self.run_check_ReadyAction, daemon=True)
+            tCheckingReadyAction.start()
+    
+    def run_check_ReadyAction(self):
+        pass
+    
+    def stop_check_ReadyAction(self):
+        self.CheckingReadyAction = False
 
-class ActionFollow(ActionBase):
+
+class ActionFollow(ActionCheckReady):
 
     RightMouseButton_isDown = False
     Priority = DataPriority.EPriorityAction.MIDDLE
@@ -115,7 +121,7 @@ class ActionFollow(ActionBase):
                             pyautogui.mouseUp(button="Right")
                             self.RightMouseButton_isDown = False
                         
-class ActionLoot(ActionBase):      
+class ActionLoot(ActionCheckReady):
     
     Priority = DataPriority.EPriorityAction.HIGHT  
     
@@ -156,3 +162,47 @@ class ActionLoot(ActionBase):
                     self.LastTargetLoc = self.TargetLoc
                     self.lock.release() 
             time.sleep(1)
+            
+class ActionSpeculate(ActionBase):
+    
+    Gold = 0
+    
+    def __init__(self, TargetManager:  CalcTarget.TargetManager):
+        super().__init__(TargetManager)
+        self.start()
+    
+    def run(self):
+        while True:
+            if self.ActionIsActive == False:
+                break
+            
+            LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png", 0.95)
+            if LocObject is None:
+                pyautogui.press("i")
+            
+            LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png", 0.95)
+            if not LocObject is None:
+                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            
+                if self.TargetLoc:
+                    pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 1)
+                    time.sleep(1)
+                    pyautogui.click()
+                    time.sleep(1)
+                    LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencySpeach.png", 0.95)
+                    if not LocObject is None:
+                        self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+                        pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 1)
+                        time.sleep(1)
+                        pyautogui.click()
+                        
+            time.sleep(2)
+
+
+            #print("Left pos win: ", EdgesWindow)
+            #print("mouse pos: ", pyautogui.position())
+
+            
+    def rrr(self):
+        pass
+    
