@@ -69,7 +69,8 @@ class WindowCap:
         self.lock.acquire()
         self.ScreenWindow = self.GetScreenshot()
         self.lock.release()
-        time.sleep(0.1)                
+        time.sleep(0.1)
+        return self.ScreenWindow                
 
     def GetWindowHandle(self):
         L_HandleWnd = win32gui.FindWindow(None, NAME_WINDOW)

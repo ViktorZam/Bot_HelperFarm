@@ -8,18 +8,23 @@ import numpy
 import win32gui
 
 UNDER_IMG_OFFSET = 110
-XY_OFFSET_LEFT_WITHDRAWN = (278, 302) # for 1024x768
-XY_OFFSET_RIGHT_WITHDRAWN = (459, 302)
+
+######## Alva START ############
+XY_OFFSET_LEFT_WITHDRAWN_COLUMN1 = (278, 302) # local pos for 1024x768
+X_LEN_BETWEEN_WITHDRAWNS = 459 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
+Y_LEN_BETWEEN_2ROWS = 384 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]
+X_LEN_BETWEEN_LEFT_WITHDRAWNS = 536 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
+
+MAX_COUNT_ROW_LOTS = 4
+MAX_COUNT_COLUMN_LOTS = 2
+MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
+######## Alva END ############
+
 
 class ELocOrient(enum.Enum):
     
     UNDER = 0
     CENTER = 1
-
-class ESideWithdrawn(enum.Enum):
-    
-    LEFT = 0
-    RIGHT = 1
        
 class TargetManager:
     LootImgNames = None
@@ -103,18 +108,32 @@ class TargetManager:
 
         return TargetLoc
     
-    def GetLocWithdrawn(self, SideWithdrawn: ESideWithdrawn): 
-        EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+    def GetLocLeftTopWithdrawn(self): 
+        EdgesWindow = win32gui.GetWindowRect(self.WinCapturing.HandleWnd)
         EdgesWindow = list(EdgesWindow)
-        EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE
-        EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE 
-        
-        if (SideWithdrawn == ESideWithdrawn.LEFT):
-            EdgesWindow[0] = EdgesWindow[0] + XY_OFFSET_LEFT_WITHDRAWN[0]
-            EdgesWindow[1] = EdgesWindow[1] + XY_OFFSET_LEFT_WITHDRAWN[1]
-        elif (SideWithdrawn == ESideWithdrawn.RIGHT):
-            EdgesWindow[0] = EdgesWindow[0] + XY_OFFSET_RIGHT_WITHDRAWN[0]
-            EdgesWindow[1] = EdgesWindow[1] + XY_OFFSET_RIGHT_WITHDRAWN[1]
-         
+        EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE + XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
+        EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE + XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]  
+                
         Loc = (EdgesWindow[0], EdgesWindow[1])   
         return Loc
+    
+    def GetAllLocsWithdrawn(self):
+        L_LeftTopLocWithdrawn = XY_OFFSET_LEFT_WITHDRAWN_COLUMN1
+        L_AllLocsWithdrawn = []
+        #cv.drawMarker(self.WinCapturing.ScreenWindow, XY_OFFSET_LEFT_WITHDRAWN_COLUMN1, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        
+        for LotIndex in range(MAX_COUNT_LOTS, 1, -1):
+            L_LocWithdrawn = [0, 0]
+            L_LocWithdrawn[1] =  L_LeftTopLocWithdrawn[1] + Y_LEN_BETWEEN_2ROWS * ((LotIndex-1)//MAX_COUNT_COLUMN_LOTS)
+                    
+            L_LocWithdrawn[0] = L_LeftTopLocWithdrawn[0] + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
+            L_AllLocsWithdrawn.append(L_LocWithdrawn)
+            L_LocWithdrawn[0] = L_LeftTopLocWithdrawn[0] + X_LEN_BETWEEN_WITHDRAWNS + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
+            L_AllLocsWithdrawn.append(L_LocWithdrawn)
+        
+        self.WinCapturing.UpdateScreenshot()
+        for loc in L_AllLocsWithdrawn:    
+            cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        return L_AllLocsWithdrawn
