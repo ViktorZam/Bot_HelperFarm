@@ -171,18 +171,26 @@ class ActionSpeculate(ActionBase):
         super().__init__(TargetManager)
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png", 0.95)
         if LocObject is None:
-            pyautogui.press("i")        
-        LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
-        #print("loc object: ", LocObject) 
-        if not LocObject is None:    
-            self.OpenCurrencyTradeWindow()
-            L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn()
-            for loc in L_AllLocsWithdrawn:
-                pyautogui.moveTo(loc[0], loc[1], 0.5)
-                time.sleep(0.5)
-                pyautogui.keyDown("ctrlleft")
-                pyautogui.click(button="Right")
-                pyautogui.keyUp("ctrlleft")
+            pyautogui.press("i")
+            
+        #LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
+    
+        #self.PickingCurrencyFromAlvaTradeWindow()
+        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+        if not LocObject is None:
+            pyautogui.press("esc")
+            time.sleep(1) 
+        
+        self.TargetManager.WinCapturing.UpdateScreenshot()
+        
+        L_ScreenShape = self.TargetManager.WinCapturing.ScreenWindow.shape
+        height = L_ScreenShape[0]
+        width = L_ScreenShape[1]
+        #cv.drawMarker(self.TargetManager.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #cv.rectangle(self.TargetManager.WinCapturing.ScreenWindow, self.LT_ObjectLoc, (7,height), color=(0,255,0), thickness=2, lineType=cv.LINE_4) 
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.TargetManager.WinCapturing.ScreenWindow)
+        
+               
         self.start()
         
     def OpenCurrencyTradeWindow(self):
@@ -206,6 +214,19 @@ class ActionSpeculate(ActionBase):
                     time.sleep(0.5)
                     pyautogui.click()
     
+    def PickingCurrencyFromAlvaTradeWindow(self):
+        self.OpenCurrencyTradeWindow()
+        L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn(CalcTarget.ETypeCoord.GLOBAL)
+        for loc in L_AllLocsWithdrawn:
+            pyautogui.moveTo(loc[0], loc[1], 0.5)
+            time.sleep(1)
+            pyautogui.keyDown("ctrlleft")
+            time.sleep(0.1)
+            pyautogui.click(button="Right")
+            time.sleep(0.1)
+            pyautogui.keyUp("ctrlleft")
+            time.sleep(0.1)
+    
     def run(self):
         while True:
             if self.ActionIsActive == False:
@@ -215,14 +236,15 @@ class ActionSpeculate(ActionBase):
                            
           
             time.sleep(2)
-
-            #EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
-            #EdgesWindow = list(EdgesWindow)
-            #EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE
-            #EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE 
-            #print("Left pos win: ", EdgesWindow)
-            #print("mouse pos: ", pyautogui.position())
-
+            
+            ##################### Debug BEGIN
+            EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+            EdgesWindow = list(EdgesWindow)
+            EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE
+            EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE 
+            print("Left pos win: ", EdgesWindow)
+            print("mouse pos: ", pyautogui.position())
+            #################### Debug END
             
     def rrr(self):
         pass

@@ -15,7 +15,7 @@ X_LEN_BETWEEN_WITHDRAWNS = 459 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
 Y_LEN_BETWEEN_2ROWS = 384 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]
 X_LEN_BETWEEN_LEFT_WITHDRAWNS = 536 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
 
-MAX_COUNT_ROW_LOTS = 4
+MAX_COUNT_ROW_LOTS = 5
 MAX_COUNT_COLUMN_LOTS = 2
 MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
 ######## Alva END ############
@@ -25,6 +25,11 @@ class ELocOrient(enum.Enum):
     
     UNDER = 0
     CENTER = 1
+
+class ETypeCoord(enum.Enum):
+    
+    LOCAL = 0
+    GLOBAL = 1
        
 class TargetManager:
     LootImgNames = None
@@ -108,32 +113,38 @@ class TargetManager:
 
         return TargetLoc
     
-    def GetLocLeftTopWithdrawn(self): 
+    def ConvertLocalCoordToGlobal(self, Loc: list):
         EdgesWindow = win32gui.GetWindowRect(self.WinCapturing.HandleWnd)
-        EdgesWindow = list(EdgesWindow)
-        EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE + XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
-        EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE + XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]  
-                
-        Loc = (EdgesWindow[0], EdgesWindow[1])   
+        Loc = (Loc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                Loc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)  
         return Loc
     
-    def GetAllLocsWithdrawn(self):
+    
+    
+    def GetAllLocsWithdrawn(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
         L_LeftTopLocWithdrawn = XY_OFFSET_LEFT_WITHDRAWN_COLUMN1
         L_AllLocsWithdrawn = []
-        #cv.drawMarker(self.WinCapturing.ScreenWindow, XY_OFFSET_LEFT_WITHDRAWN_COLUMN1, color=(255,0,255), markerType=cv.MARKER_CROSS)
+
+        for LotIndex in range(MAX_COUNT_LOTS, 0, -1):
+            L_LocWithdrawn1 = [0, 0]
+            L_LocWithdrawn2 = [0, 0]
+            L_LocWithdrawn1[1] = L_LocWithdrawn2[1] = L_LeftTopLocWithdrawn[1] + Y_LEN_BETWEEN_2ROWS * ((LotIndex-1)//MAX_COUNT_COLUMN_LOTS)
+                
+            L_LocWithdrawn1[0] = L_LeftTopLocWithdrawn[0] + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
+            if (TypeCoord == ETypeCoord.GLOBAL):
+                L_LocWithdrawn1 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn1)
+            L_AllLocsWithdrawn.append(L_LocWithdrawn1)
+            L_LocWithdrawn2[0] = L_LocWithdrawn1[0] + X_LEN_BETWEEN_WITHDRAWNS
+            if (TypeCoord == ETypeCoord.GLOBAL):
+                L_LocWithdrawn2 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn2)
+            L_AllLocsWithdrawn.append(L_LocWithdrawn2)
+            
+
+            
+        ##################### Debug BEGIN
+        #self.WinCapturing.UpdateScreenshot()
+        #for loc in L_AllLocsWithdrawn:    
+        #    cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
         #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
-        
-        for LotIndex in range(MAX_COUNT_LOTS, 1, -1):
-            L_LocWithdrawn = [0, 0]
-            L_LocWithdrawn[1] =  L_LeftTopLocWithdrawn[1] + Y_LEN_BETWEEN_2ROWS * ((LotIndex-1)//MAX_COUNT_COLUMN_LOTS)
-                    
-            L_LocWithdrawn[0] = L_LeftTopLocWithdrawn[0] + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
-            L_AllLocsWithdrawn.append(L_LocWithdrawn)
-            L_LocWithdrawn[0] = L_LeftTopLocWithdrawn[0] + X_LEN_BETWEEN_WITHDRAWNS + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
-            L_AllLocsWithdrawn.append(L_LocWithdrawn)
-        
-        self.WinCapturing.UpdateScreenshot()
-        for loc in L_AllLocsWithdrawn:    
-            cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-        cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        #################### Debug END
         return L_AllLocsWithdrawn

@@ -10,7 +10,7 @@ import enum
 
 NAME_WINDOW = "Path of Exile 2"
 BORDER_PIXELS_SIZE = 8
-TITLEBAR_PIXELS_SIZE = 30
+TITLEBAR_PIXELS_SIZE = 31
 
 class ETypeScreening(enum.Enum):
     
