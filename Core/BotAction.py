@@ -183,11 +183,40 @@ class ActionSpeculate(ActionBase):
         
         self.TargetManager.WinCapturing.UpdateScreenshot()
         
-        L_ScreenShape = self.TargetManager.WinCapturing.ScreenWindow.shape
-        height = L_ScreenShape[0]
-        width = L_ScreenShape[1]
-        #cv.drawMarker(self.TargetManager.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-        #cv.rectangle(self.TargetManager.WinCapturing.ScreenWindow, self.LT_ObjectLoc, (7,height), color=(0,255,0), thickness=2, lineType=cv.LINE_4) 
+        L_ImgShape = self.TargetManager.WinCapturing.ScreenWindow.shape
+        heightScreen = int(L_ImgShape[0])
+        widthScreen = int(L_ImgShape[1])
+        L_ImgShape = cv.imread("Speculate/EmptyInvSlot.png")
+        L_ImgShape = L_ImgShape.shape
+        SizeSlotImg = int(L_ImgShape[0])
+        for value in range(1, 5):
+            if value == 1:
+                X_LT_CoordRectangle = 0
+                Y_LT_CoordRectangle = 0
+                X_RD_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[0] - ((SizeSlotImg/2) + 5))
+                Y_RD_CoordRectangle = heightScreen
+                
+            elif value == 2:
+                X_LT_CoordRectangle = 0
+                Y_LT_CoordRectangle = 0
+                X_RD_CoordRectangle = widthScreen
+                Y_RD_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[1] - ((SizeSlotImg/2) + 5))
+                
+            elif value == 3:
+                X_LT_CoordRectangle = 0
+                Y_LT_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[1] + ((SizeSlotImg/2) + 5))
+                X_RD_CoordRectangle = widthScreen
+                Y_RD_CoordRectangle = heightScreen
+                
+            elif value == 4:
+                X_LT_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[0] + ((SizeSlotImg/2) + 5))
+                Y_LT_CoordRectangle = 0
+                X_RD_CoordRectangle = widthScreen
+                Y_RD_CoordRectangle = heightScreen
+                
+            cv.rectangle(self.TargetManager.WinCapturing.ScreenWindow, (X_LT_CoordRectangle, Y_LT_CoordRectangle), 
+                        (X_RD_CoordRectangle, Y_RD_CoordRectangle), color=(255,255,255), thickness=-1) 
+            
         #cv.imwrite("Debug/" + str(time.time()) + ".png", self.TargetManager.WinCapturing.ScreenWindow)
         
                

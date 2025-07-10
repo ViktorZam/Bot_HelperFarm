@@ -20,6 +20,11 @@ MAX_COUNT_COLUMN_LOTS = 2
 MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
 ######## Alva END ############
 
+######## Char Inventory START ############
+XY_OFFSET_FIRST_CHAR_INV_SLOT = (581, 438) # local pos for 1024x768
+
+######## Char Inventory END ############
+
 
 class ELocOrient(enum.Enum):
     
