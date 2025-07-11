@@ -72,15 +72,15 @@ class TargetManager:
             ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, Encoder)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
             #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            print(MaxValMatch, "///", DesObject_img_path)
+            #print(MaxValMatch, "///", DesObject_img_path)
             ##################### Debug BEGIN
-            LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
-            SizeHChar_img = DesObject_img.shape[0]
-            SizeWChar_img = DesObject_img.shape[1]   
-            RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
-            cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
-            ResultMatch_img = (ResultMatch_img * 255).astype(numpy.uint8) #for TM_CCORR_NORMED
-            cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
+            #LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
+            #SizeHChar_img = DesObject_img.shape[0]
+            #SizeWChar_img = DesObject_img.shape[1]   
+            #RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
+            #cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
+            #ResultMatch_img = (ResultMatch_img * 255).astype(numpy.uint8) #for TM_CCORR_NORMED
+            #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             #cv.imshow("Screen", ResultMatch_img)
             #cv.waitKey(1000)
             #################### Debug END

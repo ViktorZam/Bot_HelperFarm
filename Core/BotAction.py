@@ -178,26 +178,29 @@ class ActionSpeculate(ActionBase):
             pyautogui.press("esc")
             time.sleep(1) 
         
-        LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
-        if not LocObject is None:
-            self.OpenCurrencyTradeWindow()
-            self.PickingCurrencyFromAlvaTradeWindow()
-
-        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
-        if not LocObject is None:
-            pyautogui.press("esc")
-            time.sleep(1)        
-              
-        if (self.IsEmptyCharInv() == False):
-            self.OpenChest()
-            self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.LOCAL)
-
-            
-            
-            
-            
+        IsTradeCurrencyEmpty = False
+        IsEmptyCharInv = False
         
-               
+        while (IsTradeCurrencyEmpty and IsEmptyCharInv) == True:
+            LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
+            if not LocObject is None:
+                self.PickingCurrencyFromAlvaTradeWindow()
+            else:
+                IsTradeCurrencyEmpty = True
+
+            LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+            if not LocObject is None:
+                pyautogui.press("esc")
+                time.sleep(1)        
+              
+            IsEmptyCharInv = self.IsEmptyCharInv()
+            
+            if (IsEmptyCharInv == False):
+                self.ClearChest()
+                pyautogui.press("esc") #close chest window
+                time.sleep(1)
+                IsEmptyCharInv = True  
+                  
         self.start()
         
     def OpenCurrencyTradeWindow(self):
@@ -250,8 +253,17 @@ class ActionSpeculate(ActionBase):
             time.sleep(0.1)
     
     def ClearChest(self):
-        pass
-    
+        self.OpenChest()
+        L_AllLocsCharInvSlots = self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.GLOBAL)
+        pyautogui.keyDown("ctrlleft")
+        for loc in L_AllLocsCharInvSlots:
+            pyautogui.moveTo(loc[0], loc[1], 0.2)
+            time.sleep(0.2)
+            pyautogui.click()
+            
+        pyautogui.keyUp("ctrlleft")
+        
+        
     def IsEmptyCharInv(self):
         self.TargetManager.WinCapturing.UpdateScreenshot()
         
