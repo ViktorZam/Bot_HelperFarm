@@ -22,9 +22,11 @@ MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
 
 ######## Char Inventory START ############
 XY_OFFSET_FIRST_CHAR_INV_SLOT = (581, 438) # local pos for 1024x768
-
+MAX_COUNT_ROW_CHAR_INV_SLOTS = 5
+MAX_COUNT_COLUMN_CHAR_INV_SLOTS = 12
+MAX_COUNT_CHAR_INV_SLOTS = MAX_COUNT_ROW_CHAR_INV_SLOTS * MAX_COUNT_COLUMN_CHAR_INV_SLOTS
+SIZE_CHAR_INV_SLOT = (cv.imread("Speculate/EmptyInvSlot.png")).shape[0]
 ######## Char Inventory END ############
-
 
 class ELocOrient(enum.Enum):
     
@@ -57,27 +59,28 @@ class TargetManager:
         return LocObject
 
 
-    def FindLocObject(self, DesObject_img_path, ValueMatching=0.94, Encoder=cv.TM_CCORR_NORMED):
+    def FindLocObject(self, DesObject_img_path, ValueMatching=0.94, Encoder=cv.TM_CCORR_NORMED, NewScreen=True):
         
         DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
         #cv.imwrite(str(time.time()) + ".png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
-        if (self.WinCapturing.TypeScreening == WinCap.ETypeScreening.MANUAL):
-            self.WinCapturing.UpdateScreenshot()
+        if NewScreen == True:
+            if (self.WinCapturing.TypeScreening == WinCap.ETypeScreening.MANUAL):
+                self.WinCapturing.UpdateScreenshot()
         
         if not self.WinCapturing.ScreenWindow is None:
             ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, Encoder)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
             #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            #print(MaxValMatch, "///", DesObject_img_path)
+            print(MaxValMatch, "///", DesObject_img_path)
             ##################### Debug BEGIN
-            #LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
-            #SizeHChar_img = DesObject_img.shape[0]
-            #SizeWChar_img = DesObject_img.shape[1]   
-            #RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
-            #cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
-            #ResultMatch_img = (ResultMatch_img * 255).astype(numpy.uint8) #for TM_CCORR_NORMED
-            #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
+            LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
+            SizeHChar_img = DesObject_img.shape[0]
+            SizeWChar_img = DesObject_img.shape[1]   
+            RD_ObjectLoc = (LT_ObjectLoc[0] + SizeWChar_img, LT_ObjectLoc[1] + SizeHChar_img)
+            cv.rectangle(ResultMatch_img, LT_ObjectLoc, RD_ObjectLoc, color=(0,255,0), thickness=2, lineType=cv.LINE_4)
+            ResultMatch_img = (ResultMatch_img * 255).astype(numpy.uint8) #for TM_CCORR_NORMED
+            cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             #cv.imshow("Screen", ResultMatch_img)
             #cv.waitKey(1000)
             #################### Debug END
@@ -124,8 +127,6 @@ class TargetManager:
                 Loc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)  
         return Loc
     
-    
-    
     def GetAllLocsWithdrawn(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
         L_LeftTopLocWithdrawn = XY_OFFSET_LEFT_WITHDRAWN_COLUMN1
         L_AllLocsWithdrawn = []
@@ -143,13 +144,25 @@ class TargetManager:
             if (TypeCoord == ETypeCoord.GLOBAL):
                 L_LocWithdrawn2 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn2)
             L_AllLocsWithdrawn.append(L_LocWithdrawn2)
-            
-
-            
+ 
+    def GetAllLocsCharInvSlots(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
+        L_LeftTopLocCharInvSlot = list(XY_OFFSET_FIRST_CHAR_INV_SLOT)
+        L_AllLocsCharInvSlots = []
+        L_LocCharInvSlot = list()
+        for ColumnSlot in range(MAX_COUNT_COLUMN_CHAR_INV_SLOTS):
+            L_XLocCharInvSlot = L_LeftTopLocCharInvSlot[0] + SIZE_CHAR_INV_SLOT * ColumnSlot
+            for RowSlot in range(MAX_COUNT_ROW_CHAR_INV_SLOTS):
+                L_YLocCharInvSlot = L_LeftTopLocCharInvSlot[1] + SIZE_CHAR_INV_SLOT * RowSlot  
+                L_LocCharInvSlot = [L_XLocCharInvSlot, L_YLocCharInvSlot]
+                if (TypeCoord == ETypeCoord.GLOBAL):
+                    L_LocCharInvSlot = self.ConvertLocalCoordToGlobal(L_LocCharInvSlot)
+                
+                L_AllLocsCharInvSlots.append(L_LocCharInvSlot)
+    
         ##################### Debug BEGIN
         #self.WinCapturing.UpdateScreenshot()
-        #for loc in L_AllLocsWithdrawn:    
+        #for loc in L_AllLocsCharInvSlots:    
         #    cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
         #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
         #################### Debug END
-        return L_AllLocsWithdrawn
+        return L_AllLocsCharInvSlots

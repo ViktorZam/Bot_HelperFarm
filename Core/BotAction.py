@@ -173,14 +173,86 @@ class ActionSpeculate(ActionBase):
         if LocObject is None:
             pyautogui.press("i")
             
-        #LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
-    
-        #self.PickingCurrencyFromAlvaTradeWindow()
         LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
         if not LocObject is None:
             pyautogui.press("esc")
             time.sleep(1) 
         
+        LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
+        if not LocObject is None:
+            self.OpenCurrencyTradeWindow()
+            self.PickingCurrencyFromAlvaTradeWindow()
+
+        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+        if not LocObject is None:
+            pyautogui.press("esc")
+            time.sleep(1)        
+              
+        if (self.IsEmptyCharInv() == False):
+            self.OpenChest()
+            self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.LOCAL)
+
+            
+            
+            
+            
+        
+               
+        self.start()
+        
+    def OpenCurrencyTradeWindow(self):
+        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+        if not LocObject is None:
+            return
+
+        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png", 0.95)
+        if not LocObject is None:
+            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            
+            if self.TargetLoc:
+                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                time.sleep(0.5)
+                pyautogui.click()
+                time.sleep(1)
+                LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencySpeach.png", 0.95)
+                if not LocObject is None:
+                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+                    pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                    time.sleep(0.5)
+                    pyautogui.click()
+    
+    def OpenChest(self):
+        LocObject = self.TargetManager.FindLocObject("Speculate/ChestWindow.png", 0.97)
+        if not LocObject is None:
+            return
+        
+        LocObject = self.TargetManager.FindLocObject("Speculate/Chest.png")
+        if not LocObject is None:
+            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            
+            if self.TargetLoc:
+                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                time.sleep(0.5)
+                pyautogui.click()
+                time.sleep(1)
+    
+    def PickingCurrencyFromAlvaTradeWindow(self):
+        self.OpenCurrencyTradeWindow()
+        L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn(CalcTarget.ETypeCoord.GLOBAL)
+        for loc in L_AllLocsWithdrawn:
+            pyautogui.moveTo(loc[0], loc[1], 0.5)
+            time.sleep(1)
+            pyautogui.keyDown("ctrlleft")
+            time.sleep(0.1)
+            pyautogui.click(button="Right")
+            time.sleep(0.1)
+            pyautogui.keyUp("ctrlleft")
+            time.sleep(0.1)
+    
+    def ClearChest(self):
+        pass
+    
+    def IsEmptyCharInv(self):
         self.TargetManager.WinCapturing.UpdateScreenshot()
         
         L_ImgShape = self.TargetManager.WinCapturing.ScreenWindow.shape
@@ -217,45 +289,13 @@ class ActionSpeculate(ActionBase):
             cv.rectangle(self.TargetManager.WinCapturing.ScreenWindow, (X_LT_CoordRectangle, Y_LT_CoordRectangle), 
                         (X_RD_CoordRectangle, Y_RD_CoordRectangle), color=(255,255,255), thickness=-1) 
             
-        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.TargetManager.WinCapturing.ScreenWindow)
-        
-               
-        self.start()
-        
-    def OpenCurrencyTradeWindow(self):
-        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.TargetManager.WinCapturing.ScreenWindow)    
+        LocObject = self.TargetManager.FindLocObject("Speculate/EmptyInvSlot.png", NewScreen=False)
         if not LocObject is None:
-            return
+            return True
+        else:
+            return False
 
-        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png", 0.95)
-        if not LocObject is None:
-            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-            
-            if self.TargetLoc:
-                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
-                time.sleep(0.5)
-                pyautogui.click()
-                time.sleep(1)
-                LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencySpeach.png", 0.95)
-                if not LocObject is None:
-                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-                    pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
-                    time.sleep(0.5)
-                    pyautogui.click()
-    
-    def PickingCurrencyFromAlvaTradeWindow(self):
-        self.OpenCurrencyTradeWindow()
-        L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn(CalcTarget.ETypeCoord.GLOBAL)
-        for loc in L_AllLocsWithdrawn:
-            pyautogui.moveTo(loc[0], loc[1], 0.5)
-            time.sleep(1)
-            pyautogui.keyDown("ctrlleft")
-            time.sleep(0.1)
-            pyautogui.click(button="Right")
-            time.sleep(0.1)
-            pyautogui.keyUp("ctrlleft")
-            time.sleep(0.1)
-    
     def run(self):
         while True:
             if self.ActionIsActive == False:
