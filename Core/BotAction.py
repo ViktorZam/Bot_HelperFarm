@@ -7,6 +7,7 @@ import enum
 from Core import DataPriority
 from Core import CalcTarget
 import cv2 as cv
+import sys
 
 class EStateCheckAction(enum.Enum):
     
@@ -165,7 +166,18 @@ class ActionLoot(ActionCheckReady):
             
 class ActionSpeculate(ActionBase):
     
+    CurrencyData = {
+        "DIVINE" : "Speculate/Currency/Divine.png",
+        "CHAOS" : "Speculate/Currency/Chaos.png",
+        "EXALT" : "Speculate/Currency/Exalt.png"
+    }
+    
+    
     Gold = 0
+    PrimaryCurrency = { "NAME" : sys.argv[1], "COUNT" : 0}
+    SecondaryCurrency = { "NAME" : sys.argv[2], "COUNT" : 0} 
+
+    
     
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
@@ -178,28 +190,9 @@ class ActionSpeculate(ActionBase):
             pyautogui.press("esc")
             time.sleep(1) 
         
-        IsTradeCurrencyEmpty = False
-        IsEmptyCharInv = False
-        
-        while (IsTradeCurrencyEmpty and IsEmptyCharInv) == True:
-            LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
-            if not LocObject is None:
-                self.PickingCurrencyFromAlvaTradeWindow()
-            else:
-                IsTradeCurrencyEmpty = True
-
-            LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
-            if not LocObject is None:
-                pyautogui.press("esc")
-                time.sleep(1)        
-              
-            IsEmptyCharInv = self.IsEmptyCharInv()
-            
-            if (IsEmptyCharInv == False):
-                self.ClearChest()
-                pyautogui.press("esc") #close chest window
-                time.sleep(1)
-                IsEmptyCharInv = True  
+        self.PickingAllCurrency()
+        self.OpenChestTab("Speculate/OrbChestTab.png")
+ 
                   
         self.start()
         
@@ -239,6 +232,17 @@ class ActionSpeculate(ActionBase):
                 pyautogui.click()
                 time.sleep(1)
     
+    def OpenChestTab(self, path_img_tab):
+        self.OpenChest()
+        LocObject = self.TargetManager.FindLocObject(path_img_tab)
+        if not LocObject is None:
+            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            if self.TargetLoc:
+                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                time.sleep(0.5)
+                pyautogui.click()
+                time.sleep(1)
+    
     def PickingCurrencyFromAlvaTradeWindow(self):
         self.OpenCurrencyTradeWindow()
         L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn(CalcTarget.ETypeCoord.GLOBAL)
@@ -261,8 +265,7 @@ class ActionSpeculate(ActionBase):
             time.sleep(0.2)
             pyautogui.click()
             
-        pyautogui.keyUp("ctrlleft")
-        
+        pyautogui.keyUp("ctrlleft")     
         
     def IsEmptyCharInv(self):
         self.TargetManager.WinCapturing.UpdateScreenshot()
@@ -308,6 +311,30 @@ class ActionSpeculate(ActionBase):
         else:
             return False
 
+    def PickingAllCurrency(self):
+        IsTradeCurrencyEmpty = False
+        IsEmptyCharInv = False
+        
+        while (IsTradeCurrencyEmpty and IsEmptyCharInv) == True:
+            LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
+            if not LocObject is None:
+                self.PickingCurrencyFromAlvaTradeWindow()
+            else:
+                IsTradeCurrencyEmpty = True
+
+            LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+            if not LocObject is None:
+                pyautogui.press("esc")
+                time.sleep(1)        
+              
+            IsEmptyCharInv = self.IsEmptyCharInv()
+            
+            if (IsEmptyCharInv == False):
+                self.ClearChest()
+                pyautogui.press("esc") #close chest window
+                time.sleep(1)
+                IsEmptyCharInv = True
+                
     def run(self):
         while True:
             if self.ActionIsActive == False:
