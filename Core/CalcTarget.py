@@ -6,6 +6,7 @@ import time
 from Core import WindowCapture as WinCap
 import numpy
 import win32gui
+import easyocr
 
 UNDER_IMG_OFFSET = 110
 
@@ -27,6 +28,10 @@ MAX_COUNT_COLUMN_CHAR_INV_SLOTS = 12
 MAX_COUNT_CHAR_INV_SLOTS = MAX_COUNT_ROW_CHAR_INV_SLOTS * MAX_COUNT_COLUMN_CHAR_INV_SLOTS
 SIZE_CHAR_INV_SLOT = (cv.imread("Speculate/EmptyInvSlot.png")).shape[0]
 ######## Char Inventory END ############
+
+######## Chest START ############
+SIZE_IMG_CURRENCY = (cv.imread("Speculate/SizeImgCurrency.png")).shape[0]
+######## Chest END ############
 
 class ELocOrient(enum.Enum):
     
@@ -97,7 +102,7 @@ class TargetManager:
                 return None
         return None
         
-    def GetTargetLoc(self, LocOrient: ELocOrient, LocObject): 
+    def GetTargetLoc(self, LocOrient: ELocOrient, LocObject, TypeCoord: ETypeCoord=ETypeCoord.GLOBAL): 
         LT_ObjectLoc = LocObject[0]
         RD_ObjectLoc = LocObject[1]
         if LocOrient == ELocOrient.UNDER:
@@ -111,13 +116,14 @@ class TargetManager:
     
         if Debug.DEBUG_MODE == Debug.EDebugMode.DEBUG_MODE_ON:
             self.WinCapturing.SetDebugLocs(LT_ObjectLoc, RD_ObjectLoc, TargetLoc)
+        
+        if TypeCoord == ETypeCoord.GLOBAL:    
+            EdgesWindow = win32gui.GetWindowRect(self.WinCapturing.HandleWnd)
+            TargetLoc = (TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
+                        TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)    
             
-        EdgesWindow = win32gui.GetWindowRect(self.WinCapturing.HandleWnd)
-        TargetLoc = (TargetLoc[0] + EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE,
-                     TargetLoc[1] + EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE)    
-            
-        if (TargetLoc[0] > EdgesWindow[2]) or (TargetLoc[1] > EdgesWindow[3]) or (TargetLoc[0] < EdgesWindow[0]) or (TargetLoc[1] < EdgesWindow[1]):
-            return None
+            if (TargetLoc[0] > EdgesWindow[2]) or (TargetLoc[1] > EdgesWindow[3]) or (TargetLoc[0] < EdgesWindow[0]) or (TargetLoc[1] < EdgesWindow[1]):
+                return None
 
         return TargetLoc
     

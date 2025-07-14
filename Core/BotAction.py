@@ -171,14 +171,11 @@ class ActionSpeculate(ActionBase):
         "CHAOS" : "Speculate/Currency/Chaos.png",
         "EXALT" : "Speculate/Currency/Exalt.png"
     }
-    
-    
+
     Gold = 0
     PrimaryCurrency = { "NAME" : sys.argv[1], "COUNT" : 0}
     SecondaryCurrency = { "NAME" : sys.argv[2], "COUNT" : 0} 
 
-    
-    
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png", 0.95)
@@ -192,7 +189,15 @@ class ActionSpeculate(ActionBase):
         
         self.PickingAllCurrency()
         self.OpenChestTab("Speculate/OrbChestTab.png")
- 
+        
+        path_to_currency = self.CurrencyData.get(self.PrimaryCurrency.get("NAME"))
+        
+        LocObject = self.TargetManager.FindLocObject(path_to_currency)
+        if not LocObject is None:
+            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject, 
+                                                             CalcTarget.ETypeCoord.LOCAL)
+            if self.TargetLoc:
+                self.MakeScreenWithMask(self.TargetLoc, CalcTarget.SIZE_IMG_CURRENCY, color_mask=(0,0,0))
                   
         self.start()
         
@@ -266,43 +271,44 @@ class ActionSpeculate(ActionBase):
             pyautogui.click()
             
         pyautogui.keyUp("ctrlleft")     
-        
-    def IsEmptyCharInv(self):
+    
+    def MakeScreenWithMask(self, xy_offset_spec_area: tuple, SizeSpecificArea, color_mask=(255,255,255)):
         self.TargetManager.WinCapturing.UpdateScreenshot()
         
-        L_ImgShape = self.TargetManager.WinCapturing.ScreenWindow.shape
-        heightScreen = int(L_ImgShape[0])
-        widthScreen = int(L_ImgShape[1])
-        L_ImgShape = cv.imread("Speculate/EmptyInvSlot.png")
-        L_ImgShape = L_ImgShape.shape
-        SizeSlotImg = int(L_ImgShape[0])
+        L_ScreenWindowShape = self.TargetManager.WinCapturing.ScreenWindow.shape
+        heightScreen = int(L_ScreenWindowShape[0])
+        widthScreen = int(L_ScreenWindowShape[1])
         for value in range(1, 5):
             if value == 1:
                 X_LT_CoordRectangle = 0
                 Y_LT_CoordRectangle = 0
-                X_RD_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[0] - ((SizeSlotImg/2) + 5))
+                X_RD_CoordRectangle = int(xy_offset_spec_area[0] - ((SizeSpecificArea/2) + 5))
                 Y_RD_CoordRectangle = heightScreen
                 
             elif value == 2:
                 X_LT_CoordRectangle = 0
                 Y_LT_CoordRectangle = 0
                 X_RD_CoordRectangle = widthScreen
-                Y_RD_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[1] - ((SizeSlotImg/2) + 5))
+                Y_RD_CoordRectangle = int(xy_offset_spec_area[1] - ((SizeSpecificArea/2) + 5))
                 
             elif value == 3:
                 X_LT_CoordRectangle = 0
-                Y_LT_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[1] + ((SizeSlotImg/2) + 5))
+                Y_LT_CoordRectangle = int(xy_offset_spec_area[1] + ((SizeSpecificArea/2) + 5))
                 X_RD_CoordRectangle = widthScreen
                 Y_RD_CoordRectangle = heightScreen
                 
             elif value == 4:
-                X_LT_CoordRectangle = int(CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT[0] + ((SizeSlotImg/2) + 5))
+                X_LT_CoordRectangle = int(xy_offset_spec_area[0] + ((SizeSpecificArea/2) + 5))
                 Y_LT_CoordRectangle = 0
                 X_RD_CoordRectangle = widthScreen
                 Y_RD_CoordRectangle = heightScreen
                 
             cv.rectangle(self.TargetManager.WinCapturing.ScreenWindow, (X_LT_CoordRectangle, Y_LT_CoordRectangle), 
-                        (X_RD_CoordRectangle, Y_RD_CoordRectangle), color=(255,255,255), thickness=-1) 
+                        (X_RD_CoordRectangle, Y_RD_CoordRectangle), color=color_mask, thickness=-1) 
+      
+    def IsEmptyCharInv(self):
+        self.MakeScreenWithMask(xy_offset_spec_area = CalcTarget.XY_OFFSET_FIRST_CHAR_INV_SLOT, 
+                                SizeSpecificArea= CalcTarget.SIZE_CHAR_INV_SLOT)
             
         #cv.imwrite("Debug/" + str(time.time()) + ".png", self.TargetManager.WinCapturing.ScreenWindow)    
         LocObject = self.TargetManager.FindLocObject("Speculate/EmptyInvSlot.png", NewScreen=False)
