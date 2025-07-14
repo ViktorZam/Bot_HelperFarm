@@ -4,3 +4,7 @@ opencv-python
 pywin32
 keyboard
 pyautogui
+torch 
+torchvision 
+torchaudio 
+easyocr
