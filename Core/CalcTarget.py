@@ -6,7 +6,6 @@ import time
 from Core import WindowCapture as WinCap
 import numpy
 import win32gui
-import easyocr
 
 UNDER_IMG_OFFSET = 110
 

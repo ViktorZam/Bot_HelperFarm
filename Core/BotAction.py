@@ -8,7 +8,7 @@ from Core import DataPriority
 from Core import CalcTarget
 import cv2 as cv
 import sys
-
+from Core import OCR
 class EStateCheckAction(enum.Enum):
     
     DISABLE = 0
@@ -68,7 +68,6 @@ class ActionCheckReady(ActionBase):
     
     def stop_check_ReadyAction(self):
         self.CheckingReadyAction = False
-
 
 class ActionFollow(ActionCheckReady):
 
@@ -192,13 +191,21 @@ class ActionSpeculate(ActionBase):
         
         path_to_currency = self.CurrencyData.get(self.PrimaryCurrency.get("NAME"))
         
-        LocObject = self.TargetManager.FindLocObject(path_to_currency)
+        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.9)
         if not LocObject is None:
             self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject, 
                                                              CalcTarget.ETypeCoord.LOCAL)
             if self.TargetLoc:
-                self.MakeScreenWithMask(self.TargetLoc, CalcTarget.SIZE_IMG_CURRENCY, color_mask=(0,0,0))
-                  
+                LocObject = list(LocObject)
+                LocObject1 = LocObject[0]
+                LocObject[0] = (LocObject1[0] - 5, LocObject1[1] - 5)
+                LocObject1 = LocObject[1]
+                LocObject[1] = (LocObject1[0], LocObject1[1] - 20)
+                LocObject = tuple(LocObject)
+                
+                Text = OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))
+                print(Text)  
+                
         self.start()
         
     def OpenCurrencyTradeWindow(self):
