@@ -7,19 +7,10 @@ import numpy
 reader = easyocr.Reader(["ru"], False)
 
 def GetTextFromImg(img=None):
-    
-    
-    NewImage = img
-    #NewImage = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    
-    #NewImage = cv.equalizeHist(NewImage)
 
-    #NewImage = cv.GaussianBlur(NewImage, (5, 5), 1)
+    img = cv.resize(img, None, fx=2, fy=2, interpolation=cv.INTER_LANCZOS4)
+    #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     
-    
-    #cv.imwrite("Debug/" + str(time.time()) + ".png", NewImage)
-    #cv.imwrite("Debug/" + "123" + ".png", img)
-
-    result = reader.readtext("Speculate/Test.png", detail=0)
+    result = reader.readtext(img, detail=0)
 
     return result

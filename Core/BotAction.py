@@ -199,8 +199,8 @@ class ActionSpeculate(ActionBase):
                 LocObject = list(LocObject)
                 LocObject1 = LocObject[0]
                 LocObject[0] = (LocObject1[0] - 5, LocObject1[1] - 5)
-                LocObject1 = LocObject[1]
-                LocObject[1] = (LocObject1[0], LocObject1[1] - 20)
+                #LocObject1 = LocObject[1]
+                #LocObject[1] = (LocObject1[0], LocObject1[1] - 20)
                 LocObject = tuple(LocObject)
                 
                 Text = OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))
