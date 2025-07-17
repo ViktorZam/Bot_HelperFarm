@@ -18,6 +18,9 @@ X_LEN_BETWEEN_LEFT_WITHDRAWNS = 536 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
 MAX_COUNT_ROW_LOTS = 5
 MAX_COUNT_COLUMN_LOTS = 2
 MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
+
+BUTTON_HAVE_LOC = (688, 170)
+BUTTON_WANT_LOC = (336, BUTTON_HAVE_LOC[1])
 ######## Alva END ############
 
 ######## Char Inventory START ############
@@ -63,9 +66,12 @@ class TargetManager:
         return LocObject
 
 
-    def FindLocObject(self, DesObject_img_path, ValueMatching=0.94, Encoder=cv.TM_CCORR_NORMED, NewScreen=True):
+    def FindLocObject(self, Img, ValueMatching=0.94, Encoder=cv.TM_CCORR_NORMED, NewScreen=True):
         
-        DesObject_img = cv.imread(DesObject_img_path, cv.IMREAD_UNCHANGED)
+        if isinstance(Img, str):
+            DesObject_img = cv.imread(Img, cv.IMREAD_UNCHANGED)
+        elif isinstance(Img, cv.typing.MatLike):
+            DesObject_img = Img
         #cv.imwrite(str(time.time()) + ".png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
         if NewScreen == True:
@@ -76,7 +82,7 @@ class TargetManager:
             ResultMatch_img = cv.matchTemplate(self.WinCapturing.ScreenWindow, DesObject_img, Encoder)# TM_CCOEFF_NORMED, TM_CCORR_NORMED
             #cv.imwrite("Debug/" + str(time.time()) + ".png", ResultMatch_img)
             MinValMatch, MaxValMatch, NotMatchLoc, LT_ObjectLoc = cv.minMaxLoc(ResultMatch_img)
-            #print(MaxValMatch, "///", DesObject_img_path)
+            print(MaxValMatch, "///", Img)
             ##################### Debug BEGIN
             #LT_ObjectLoc = int(LT_ObjectLoc[0]), int(LT_ObjectLoc[1])
             #SizeHChar_img = DesObject_img.shape[0]

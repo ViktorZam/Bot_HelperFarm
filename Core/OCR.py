@@ -7,7 +7,8 @@ import numpy
 reader = easyocr.Reader(["ru"], False)
 
 def GetTextFromImg(img=None):
-
+    
+    #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     img = cv.resize(img, None, fx=2, fy=2, interpolation=cv.INTER_LANCZOS4)
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     

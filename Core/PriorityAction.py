@@ -2,7 +2,7 @@ import threading
 import time
 from Core import BotAction
 from Core import CalcTarget
-from Core import DataPriority
+from Core import Data
 import sys
 import strenum
 
@@ -52,11 +52,11 @@ class PriorityManager:
         
     def AddBotAction(self, NameAction, BotAction: BotAction.ActionCheckReady):
         
-        if BotAction.Priority == DataPriority.EPriorityAction.LOW:
+        if BotAction.Priority == Data.EPriorityAction.LOW:
             self.BotLowActions.update({NameAction : BotAction})
-        elif BotAction.Priority == DataPriority.EPriorityAction.MIDDLE:
+        elif BotAction.Priority == Data.EPriorityAction.MIDDLE:
             self.BotMiddleActions.update({NameAction : BotAction})
-        elif BotAction.Priority == DataPriority.EPriorityAction.HIGHT:
+        elif BotAction.Priority == Data.EPriorityAction.HIGHT:
             self.BotHightActions.update({NameAction : BotAction})
         
 

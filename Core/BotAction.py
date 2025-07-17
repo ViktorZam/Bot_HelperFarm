@@ -4,11 +4,12 @@ import win32gui
 import time
 import threading
 import enum
-from Core import DataPriority
+from Core import Data
 from Core import CalcTarget
 import cv2 as cv
 import sys
 from Core import OCR
+
 class EStateCheckAction(enum.Enum):
     
     DISABLE = 0
@@ -72,7 +73,7 @@ class ActionCheckReady(ActionBase):
 class ActionFollow(ActionCheckReady):
 
     RightMouseButton_isDown = False
-    Priority = DataPriority.EPriorityAction.MIDDLE
+    Priority = Data.EPriorityAction.MIDDLE
 
     def run_check_ReadyAction(self):
          while True:
@@ -123,7 +124,7 @@ class ActionFollow(ActionCheckReady):
                         
 class ActionLoot(ActionCheckReady):
     
-    Priority = DataPriority.EPriorityAction.HIGHT  
+    Priority = Data.EPriorityAction.HIGHT  
     
     def run_check_ReadyAction(self):
          while True:
@@ -186,26 +187,17 @@ class ActionSpeculate(ActionBase):
             pyautogui.press("esc")
             time.sleep(1) 
         
-        self.PickingAllCurrency()
-        self.OpenChestTab("Speculate/OrbChestTab.png")
+        #self.PickingAllCurrency()
         
-        path_to_currency = self.CurrencyData.get(self.PrimaryCurrency.get("NAME"))
+        self.OpenTradeInStockTab()
+        L_CountCurrency = self.GetCountCurrencyFromUI(self.PrimaryCurrency, 0.9)
+        self.ChangeCountCurrency(Data.EMathOperation.SET, self.PrimaryCurrency, L_CountCurrency)
+        print(self.PrimaryCurrency)
         
-        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.9)
-        if not LocObject is None:
-            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject, 
-                                                             CalcTarget.ETypeCoord.LOCAL)
-            if self.TargetLoc:
-                LocObject = list(LocObject)
-                LocObject1 = LocObject[0]
-                LocObject[0] = (LocObject1[0] - 5, LocObject1[1] - 5)
-                #LocObject1 = LocObject[1]
-                #LocObject[1] = (LocObject1[0], LocObject1[1] - 20)
-                LocObject = tuple(LocObject)
-                
-                Text = OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))
-                print(Text)  
-                
+        L_CountCurrency = self.GetCountCurrencyFromUI(self.SecondaryCurrency)
+        self.ChangeCountCurrency(Data.EMathOperation.SET, self.SecondaryCurrency, L_CountCurrency)
+        print(self.SecondaryCurrency)   
+             
         self.start()
         
     def OpenCurrencyTradeWindow(self):
@@ -255,6 +247,47 @@ class ActionSpeculate(ActionBase):
                 pyautogui.click()
                 time.sleep(1)
     
+    def OpenTradeInStockTab(self, trying=0):
+        LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 1)
+        if not LocObject is None:
+            return
+        
+        LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 0.998)
+        if not LocObject is None:
+            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+            if self.TargetLoc:
+                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                time.sleep(0.5)
+                pyautogui.click()
+                time.sleep(1)
+        else:
+            self.OpenTradeHaveWindow()
+            trying = trying + 1
+            if trying < 5:
+                self.OpenTradeInStockTab(trying)
+            else:
+                return
+                
+    def OpenTradeHaveWindow(self, trying=0):
+        LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 0.998)
+        if not LocObject is None:
+            return 
+        
+        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
+        if not LocObject is None: 
+            self.TargetLoc = self.TargetManager.ConvertLocalCoordToGlobal(list(CalcTarget.BUTTON_HAVE_LOC))
+            pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+            time.sleep(0.5)
+            pyautogui.click()
+            time.sleep(1)
+        else:
+            self.OpenCurrencyTradeWindow()
+            trying = trying + 1
+            if trying < 5:
+                self.OpenTradeHaveWindow(trying)
+            else:
+                return
+
     def PickingCurrencyFromAlvaTradeWindow(self):
         self.OpenCurrencyTradeWindow()
         L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn(CalcTarget.ETypeCoord.GLOBAL)
@@ -347,6 +380,31 @@ class ActionSpeculate(ActionBase):
                 pyautogui.press("esc") #close chest window
                 time.sleep(1)
                 IsEmptyCharInv = True
+    
+    def GetCountCurrencyFromUI(self, Currency: dict, Size=None):
+        path_to_currency = self.CurrencyData.get(Currency.get("NAME"))
+        if not Size is None:
+            ImgCurrency = cv.imread(path_to_currency, cv.IMREAD_UNCHANGED)
+            ImgCurrency = cv.resize(ImgCurrency, None, fx=Size, fy=Size, interpolation=cv.INTER_LANCZOS4)
+        else:
+            ImgCurrency = path_to_currency
+        LocObject = self.TargetManager.FindLocObject(ImgCurrency, 0.8)
+
+        if LocObject:
+            LocObject = list(LocObject)
+            LT_LocObject = LocObject[0]
+            LocObject[0] = (LT_LocObject[0] - 5, LT_LocObject[1] - 5)  
+            CurrencyValue = int(OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))[0])    
+        return CurrencyValue
+    
+    def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, Currency: dict, Value):
+        if MathOperation == Data.EMathOperation.SET:
+            L_NewCurrencyCount = Value
+        elif MathOperation == Data.EMathOperation.INC: 
+            L_NewCurrencyCount = Currency.get("COUNT") + Value
+        elif MathOperation == Data.EMathOperation.DEC: 
+            L_NewCurrencyCount = Currency.get("COUNT") - Value
+        Currency.update(["COUNT", L_NewCurrencyCount])    
                 
     def run(self):
         while True:

@@ -125,7 +125,7 @@ class WindowCap:
                 
         return None
             
-    def CropImg(self, LTPos: tuple, RTPos: tuple):
+    def CropImg(self, LTPos, RTPos):
         self.lock.acquire()
         self.ScreenWindow = self.ScreenWindow[LTPos[1]:RTPos[1], LTPos[0]:RTPos[0]]
         self.lock.release()
