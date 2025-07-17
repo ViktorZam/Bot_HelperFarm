@@ -167,9 +167,9 @@ class ActionLoot(ActionCheckReady):
 class ActionSpeculate(ActionBase):
     
     CurrencyData = {
-        "DIVINE" : ("Speculate/Currency/Divine.png", "Speculate/Currency/DivineInStock_Want.png"),
-        "CHAOS" : ("Speculate/Currency/Chaos.png", "Speculate/Currency/ChaosInStock_Want.png"),
-        "EXALT" : ("Speculate/Currency/Exalt.png", "Speculate/Currency/ExaltInStock_Want.png")
+        "DIVINE" : ("Speculate/Currency/DivineLot.png", "Speculate/Currency/DivineInStock_Want.png"),
+        "CHAOS" : ("Speculate/Currency/ChaosLot.png", "Speculate/Currency/ChaosInStock_Want.png"),
+        "EXALT" : ("Speculate/Currency/ExaltLot.png", "Speculate/Currency/ExaltInStock_Want.png")
     }
 
     Gold = 0
@@ -404,13 +404,13 @@ class ActionSpeculate(ActionBase):
     
     def GetCountCurrencyFromUI(self, Currency: dict, TypeUI: Data.EUIWindow, UpdateScreen=True):
         X_offset = 10
-        Y_offset = 10
+        Y_offset = 15
         if TypeUI == Data.EUIWindow.IN_STOCK:
             path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[1]
         elif TypeUI == Data.EUIWindow.CURRENCY_TRADE:
             path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[0]
             
-        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.73, NewScreen=UpdateScreen)
+        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.93, NewScreen=UpdateScreen)
         CurrencyValue = None
         if LocObject:
             LocObject = list(LocObject)

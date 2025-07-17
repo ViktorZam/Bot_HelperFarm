@@ -1,3 +1,3 @@
 cd ..
-.venv\Scripts\python QueueBot.py EXALT CHAOS
+.venv\Scripts\python QueueBot.py CHAOS EXALT
 pause
