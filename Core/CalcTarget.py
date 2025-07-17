@@ -156,6 +156,8 @@ class TargetManager:
                 L_LocWithdrawn2 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn2)
             L_AllLocsWithdrawn.append(L_LocWithdrawn2)
  
+        return L_AllLocsWithdrawn
+ 
     def GetAllLocsCharInvSlots(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
         L_LeftTopLocCharInvSlot = list(XY_OFFSET_FIRST_CHAR_INV_SLOT)
         L_AllLocsCharInvSlots = []
