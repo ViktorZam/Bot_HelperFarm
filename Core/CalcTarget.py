@@ -72,8 +72,9 @@ class TargetManager:
             DesObject_img = cv.imread(Img, cv.IMREAD_UNCHANGED)
         elif isinstance(Img, cv.typing.MatLike):
             DesObject_img = Img
-        #cv.imwrite(str(time.time()) + ".png", DesObject_img)
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", DesObject_img)
         DesObject_img = cv.cvtColor(DesObject_img, cv.COLOR_RGBA2RGB)
+        
         if NewScreen == True:
             if (self.WinCapturing.TypeScreening == WinCap.ETypeScreening.MANUAL):
                 self.WinCapturing.UpdateScreenshot()

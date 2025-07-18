@@ -202,6 +202,9 @@ class ActionSpeculate(ActionBase):
             time.sleep(1) 
         
         self.OpenCurrencyTradeWindow()
+        L_GlobalZeroCoord = self.TargetManager.ConvertLocalCoordToGlobal([0, 0])
+        pyautogui.moveTo(L_GlobalZeroCoord[0], L_GlobalZeroCoord[1], 1)
+        time.sleep(1)
         L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn()
         for loc in L_AllLocsWithdrawn:
             self.TargetManager.WinCapturing.UpdateScreenshot()
@@ -410,7 +413,7 @@ class ActionSpeculate(ActionBase):
         elif TypeUI == Data.EUIWindow.CURRENCY_TRADE:
             path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[0]
             
-        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.93, NewScreen=UpdateScreen)
+        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.98, NewScreen=UpdateScreen)
         CurrencyValue = None
         if LocObject:
             LocObject = list(LocObject)

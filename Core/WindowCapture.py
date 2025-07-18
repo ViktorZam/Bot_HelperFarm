@@ -112,7 +112,7 @@ class WindowCap:
                     memdc.DeleteDC()
                     win32gui.ReleaseDC(self.HandleWnd, hwindc)
                     win32gui.DeleteObject(bmp.GetHandle())
-
+                    
                     img = cv.cvtColor(img, cv.COLOR_RGBA2RGB)
                     return img
                 else:
@@ -129,6 +129,7 @@ class WindowCap:
         self.lock.acquire()
         self.ScreenWindow = self.ScreenWindow[LTPos[1]:RTPos[1], LTPos[0]:RTPos[0]]
         self.lock.release()
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.ScreenWindow)
         return self.ScreenWindow
         
     def winEnumHandler(self, hwnd, ctx ):
