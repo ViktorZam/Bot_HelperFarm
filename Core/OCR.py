@@ -9,7 +9,7 @@ reader = easyocr.Reader(["ru"], False)
 def GetTextFromImg(img=None):
     
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
-    img = cv.resize(img, None, fx=10, fy=10, interpolation=cv.INTER_LANCZOS4)
+    img = cv.resize(img, None, fx=15, fy=15, interpolation=cv.INTER_LANCZOS4)
  
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     

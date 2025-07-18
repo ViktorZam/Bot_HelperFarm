@@ -212,9 +212,9 @@ class ActionSpeculate(ActionBase):
             RT_Pos = ((int(loc[0] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10), (int(loc[1] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10))
             self.TargetManager.WinCapturing.CropImg(LT_Pos, RT_Pos)
             
-            L_CountCurrency = self.GetCountCurrencyFromUI(self.PrimaryCurrency, Data.EUIWindow.CURRENCY_TRADE, False)
+            L_CountCurrency = self.GetCountCurrencyFromUI(self.PrimaryCurrency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
             if L_CountCurrency == None:
-                L_CountCurrency = self.GetCountCurrencyFromUI(self.SecondaryCurrency, Data.EUIWindow.CURRENCY_TRADE, False)
+                L_CountCurrency = self.GetCountCurrencyFromUI(self.SecondaryCurrency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
                 L_TypeCurrency = self.SecondaryCurrency
             else:
                 L_TypeCurrency = self.PrimaryCurrency
@@ -405,7 +405,7 @@ class ActionSpeculate(ActionBase):
                 time.sleep(1)
                 IsEmptyCharInv = True
     
-    def GetCountCurrencyFromUI(self, Currency: dict, TypeUI: Data.EUIWindow, UpdateScreen=True):
+    def GetCountCurrencyFromUI(self, Currency: dict, TypeUI: Data.EUIWindow, Accuracy=0.94, UpdateScreen=True):
         X_offset = 10
         Y_offset = 15
         if TypeUI == Data.EUIWindow.IN_STOCK:
@@ -413,7 +413,7 @@ class ActionSpeculate(ActionBase):
         elif TypeUI == Data.EUIWindow.CURRENCY_TRADE:
             path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[0]
             
-        LocObject = self.TargetManager.FindLocObject(path_to_currency, 0.98, NewScreen=UpdateScreen)
+        LocObject = self.TargetManager.FindLocObject(path_to_currency, Accuracy, NewScreen=UpdateScreen)
         CurrencyValue = None
         if LocObject:
             LocObject = list(LocObject)
