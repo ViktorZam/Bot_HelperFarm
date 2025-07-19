@@ -166,15 +166,21 @@ class ActionLoot(ActionCheckReady):
             
 class ActionSpeculate(ActionBase):
     
-    CurrencyData = {
+    CurrencyImgData = {
         "DIVINE" : ("Speculate/Currency/DivineLot.png", "Speculate/Currency/DivineInStock_Want.png"),
         "CHAOS" : ("Speculate/Currency/ChaosLot.png", "Speculate/Currency/ChaosInStock_Want.png"),
         "EXALT" : ("Speculate/Currency/ExaltLot.png", "Speculate/Currency/ExaltInStock_Want.png")
     }
 
+    CurrencyCountData = {
+        "DIVINE" : None,
+        "CHAOS" : None,
+        "EXALT" : None   
+    }
+
     Gold = 0
-    PrimaryCurrency = { "NAME" : sys.argv[1], "COUNT" : 0}
-    SecondaryCurrency = { "NAME" : sys.argv[2], "COUNT" : 0} 
+    PrimaryCurrency = sys.argv[1]
+    SecondaryCurrency = sys.argv[2] 
 
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
@@ -189,39 +195,9 @@ class ActionSpeculate(ActionBase):
         
         #self.PickingAllCurrency()
         
-        self.OpenTradeInStockTab()
-        L_CountCurrency = self.GetCountCurrencyFromUI(self.PrimaryCurrency, Data.EUIWindow.IN_STOCK)
-        self.ChangeCountCurrency(Data.EMathOperation.SET, self.PrimaryCurrency, L_CountCurrency)
+        self.UpdateAllCurrencyCountData()
         
-        L_CountCurrency = self.GetCountCurrencyFromUI(self.SecondaryCurrency, Data.EUIWindow.IN_STOCK)
-        self.ChangeCountCurrency(Data.EMathOperation.SET, self.SecondaryCurrency, L_CountCurrency)  
-        
-        LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 0.998)
-        if not LocObject is None:
-            pyautogui.press("esc")
-            time.sleep(1) 
-        
-        self.OpenCurrencyTradeWindow()
-        L_GlobalZeroCoord = self.TargetManager.ConvertLocalCoordToGlobal([0, 0])
-        pyautogui.moveTo(L_GlobalZeroCoord[0], L_GlobalZeroCoord[1], 1)
-        time.sleep(1)
-        L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn()
-        for loc in L_AllLocsWithdrawn:
-            self.TargetManager.WinCapturing.UpdateScreenshot()
-            LT_Pos = ((int(loc[0] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10), (int(loc[1] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10))
-            RT_Pos = ((int(loc[0] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10), (int(loc[1] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10))
-            self.TargetManager.WinCapturing.CropImg(LT_Pos, RT_Pos)
             
-            L_CountCurrency = self.GetCountCurrencyFromUI(self.PrimaryCurrency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
-            if L_CountCurrency == None:
-                L_CountCurrency = self.GetCountCurrencyFromUI(self.SecondaryCurrency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
-                L_TypeCurrency = self.SecondaryCurrency
-            else:
-                L_TypeCurrency = self.PrimaryCurrency
-            if (L_CountCurrency != 0) and (not L_CountCurrency is None):
-                self.ChangeCountCurrency(Data.EMathOperation.INC, L_TypeCurrency, L_CountCurrency)
-                
-             
         self.start()
         
     def OpenCurrencyTradeWindow(self):
@@ -405,13 +381,13 @@ class ActionSpeculate(ActionBase):
                 time.sleep(1)
                 IsEmptyCharInv = True
     
-    def GetCountCurrencyFromUI(self, Currency: dict, TypeUI: Data.EUIWindow, Accuracy=0.94, UpdateScreen=True):
+    def GetCountCurrencyFromUI(self, CurrencyName: str, TypeUI: Data.EUIWindow, Accuracy=0.94, UpdateScreen=True):
         X_offset = 10
         Y_offset = 15
         if TypeUI == Data.EUIWindow.IN_STOCK:
-            path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[1]
+            path_to_currency = self.CurrencyImgData.get(CurrencyName)[1]
         elif TypeUI == Data.EUIWindow.CURRENCY_TRADE:
-            path_to_currency = self.CurrencyData.get(Currency.get("NAME"))[0]
+            path_to_currency = self.CurrencyImgData.get(CurrencyName)[0]
             
         LocObject = self.TargetManager.FindLocObject(path_to_currency, Accuracy, NewScreen=UpdateScreen)
         CurrencyValue = None
@@ -422,15 +398,50 @@ class ActionSpeculate(ActionBase):
             CurrencyValue = int(OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))[0])    
         return CurrencyValue
     
-    def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, Currency: dict, Value):
+    def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, CurrencyName: str, Value):
         if MathOperation == Data.EMathOperation.SET:
             L_NewCurrencyCount = Value
-        elif MathOperation == Data.EMathOperation.INC: 
-            L_NewCurrencyCount = Currency.get("COUNT") + Value
-        elif MathOperation == Data.EMathOperation.DEC: 
-            L_NewCurrencyCount = Currency.get("COUNT") - Value
-        Currency.update(COUNT=L_NewCurrencyCount)
-        print(Currency)    
+        elif MathOperation == Data.EMathOperation.INC:
+            if not self.CurrencyCountData.get(CurrencyName) is None:
+                L_NewCurrencyCount = self.CurrencyCountData.get(CurrencyName) + Value
+            else:
+                L_NewCurrencyCount = Value
+        elif MathOperation == Data.EMathOperation.DEC:
+            if not self.CurrencyCountData.get(CurrencyName) is None:
+                L_NewCurrencyCount = self.CurrencyCountData.get(CurrencyName) - Value
+            else:
+                L_NewCurrencyCount = 0
+
+        self.CurrencyCountData[CurrencyName] = L_NewCurrencyCount
+        print(self.CurrencyCountData)    
+        
+    def UpdateAllCurrencyCountData(self):
+        self.OpenTradeInStockTab()
+        for Currency in list(self.CurrencyCountData.keys()):
+            L_CountCurrency = self.GetCountCurrencyFromUI(Currency, Data.EUIWindow.IN_STOCK)
+            self.ChangeCountCurrency(Data.EMathOperation.INC, Currency, L_CountCurrency)
+        
+        LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 0.998)
+        if not LocObject is None:
+            pyautogui.press("esc")
+            time.sleep(1) 
+        
+        self.OpenCurrencyTradeWindow()
+        L_GlobalZeroCoord = self.TargetManager.ConvertLocalCoordToGlobal([0, 0])
+        pyautogui.moveTo(L_GlobalZeroCoord[0], L_GlobalZeroCoord[1], 1)
+        time.sleep(1)
+        L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn()
+        for loc in L_AllLocsWithdrawn:
+            self.TargetManager.WinCapturing.UpdateScreenshot()
+            LT_Pos = ((int(loc[0] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10), (int(loc[1] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10))
+            RT_Pos = ((int(loc[0] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10), (int(loc[1] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10))
+            self.TargetManager.WinCapturing.CropImg(LT_Pos, RT_Pos)
+            
+            for Currency in list(self.CurrencyCountData.keys()):
+                L_CountCurrency = self.GetCountCurrencyFromUI(Currency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
+                if (not L_CountCurrency is None) and (L_CountCurrency != 0):
+                    self.ChangeCountCurrency(Data.EMathOperation.INC, Currency, L_CountCurrency)
+                    break
                 
     def run(self):
         while True:
