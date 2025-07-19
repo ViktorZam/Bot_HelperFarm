@@ -167,15 +167,19 @@ class ActionLoot(ActionCheckReady):
 class ActionSpeculate(ActionBase):
     
     CurrencyImgData = {
-        "DIVINE" : ("Speculate/Currency/DivineLot.png", "Speculate/Currency/DivineInStock_Want.png"),
-        "CHAOS" : ("Speculate/Currency/ChaosLot.png", "Speculate/Currency/ChaosInStock_Want.png"),
-        "EXALT" : ("Speculate/Currency/ExaltLot.png", "Speculate/Currency/ExaltInStock_Want.png")
+        "DIVINE" : ("Speculate/Currency/DivineLot.png", "Speculate/Currency/DivineInStock.png"),
+        "CHAOS" : ("Speculate/Currency/ChaosLot.png", "Speculate/Currency/ChaosInStock.png"),
+        "EXALT" : ("Speculate/Currency/ExaltLot.png", "Speculate/Currency/ExaltInStock.png"),
+        "ARTIFACT_ORDER" : ("Speculate/Currency/ArtifactOrderLot.png", "Speculate/Currency/ArtifactOrderInStock.png"),
+        "COINS" : ("Speculate/Currency/CoinsLot.png", "Speculate/Currency/CoinsInStock.png")   
     }
 
     CurrencyCountData = {
         "DIVINE" : None,
         "CHAOS" : None,
-        "EXALT" : None   
+        "EXALT" : None, 
+        "ARTIFACT_ORDER" : None,
+        "COINS" : None
     }
 
     Gold = 0
