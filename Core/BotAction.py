@@ -385,7 +385,7 @@ class ActionSpeculate(ActionBase):
                 time.sleep(1)
                 IsEmptyCharInv = True
     
-    def GetCountCurrencyFromUI(self, CurrencyName: str, TypeUI: Data.EUIWindow, Accuracy=0.94, UpdateScreen=True):
+    def GetCountCurrencyFromUI(self, CurrencyName: str, TypeUI: Data.EUIWindow, Accuracy=0.94, UpdateScreen=True, CropScreen=True):
         X_offset = 10
         Y_offset = 15
         if TypeUI == Data.EUIWindow.IN_STOCK:
@@ -398,8 +398,11 @@ class ActionSpeculate(ActionBase):
         if LocObject:
             LocObject = list(LocObject)
             LT_LocObject = LocObject[0]
-            LocObject[0] = (LT_LocObject[0] - X_offset, LT_LocObject[1] - Y_offset)  
-            CurrencyValue = int(OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))[0])    
+            LocObject[0] = (LT_LocObject[0] - X_offset, LT_LocObject[1] - Y_offset)
+            if CropScreen:  
+                CurrencyValue = int(OCR.GetTextFromImg(self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1]))[0]) 
+            else:
+                CurrencyValue = int(OCR.GetTextFromImg(self.TargetManager.WinCapturing.ScreenWindow)[0])
         return CurrencyValue
     
     def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, CurrencyName: str, Value):
@@ -437,12 +440,12 @@ class ActionSpeculate(ActionBase):
         L_AllLocsWithdrawn = self.TargetManager.GetAllLocsWithdrawn()
         for loc in L_AllLocsWithdrawn:
             self.TargetManager.WinCapturing.UpdateScreenshot()
-            LT_Pos = ((int(loc[0] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10), (int(loc[1] - (CalcTarget.SIZE_IMG_CURRENCY)/2) - 10))
-            RT_Pos = ((int(loc[0] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10), (int(loc[1] + (CalcTarget.SIZE_IMG_CURRENCY)/2) + 10))
+            LT_Pos = [int(loc[0] - (CalcTarget.SIZE_IMG_CURRENCY/2)), int(loc[1] - (CalcTarget.SIZE_IMG_CURRENCY/2))]
+            RT_Pos = [int(loc[0] + (CalcTarget.SIZE_IMG_CURRENCY/2) + 10), int(loc[1] + (CalcTarget.SIZE_IMG_CURRENCY/2) + 10)]
             self.TargetManager.WinCapturing.CropImg(LT_Pos, RT_Pos)
             
             for Currency in list(self.CurrencyCountData.keys()):
-                L_CountCurrency = self.GetCountCurrencyFromUI(Currency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False)
+                L_CountCurrency = self.GetCountCurrencyFromUI(Currency, Data.EUIWindow.CURRENCY_TRADE, 0.98, False, False)
                 if (not L_CountCurrency is None) and (L_CountCurrency != 0):
                     self.ChangeCountCurrency(Data.EMathOperation.INC, Currency, L_CountCurrency)
                     break
