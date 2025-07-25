@@ -184,10 +184,10 @@ class ActionSpeculate(ActionBase):
     
     CurrencyCropOffsetTradeUI = {
         "DIVINE" : (13, 11, 0, 19),
-        "CHAOS" : (0, 0, 0, 0),
-        "EXALT" : (5, 10, 0, 10), 
+        "CHAOS" : (8, 13, 0, 14),
+        "EXALT" : (5, 11, 0, 10), 
         "ARTIFACT_ORDER" : (12, 12, 0, 8),
-        "COINS" : (0, 0, 0, 0)
+        "COINS" : (8, 14, 0, 14)
     }
     
 
