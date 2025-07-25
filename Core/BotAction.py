@@ -181,6 +181,15 @@ class ActionSpeculate(ActionBase):
         "ARTIFACT_ORDER" : None,
         "COINS" : None
     }
+    
+    CurrencyCropOffsetTradeUI = {
+        "DIVINE" : (13, 11, 0, 19),
+        "CHAOS" : (0, 0, 0, 0),
+        "EXALT" : (5, 10, 0, 10), 
+        "ARTIFACT_ORDER" : (12, 12, 0, 8),
+        "COINS" : (0, 0, 0, 0)
+    }
+    
 
     Gold = 0
     PrimaryCurrency = sys.argv[1]
@@ -398,14 +407,18 @@ class ActionSpeculate(ActionBase):
             LocObject[0] = (LT_LocObject[0] + LT_Offset[0], LT_LocObject[1] + LT_Offset[1])
             LocObject[1] = (RT_LocObject[0] + RT_Offset[0], RT_LocObject[1] + RT_Offset[1])  
             L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
-            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25)[0]) 
+            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25)[0])
+        else:
+            CurrencyValue = 0 
 
         return CurrencyValue
     
     
     def GetCountCurrencyFromCurrencyTradeUI(self, CurrencyName: str, Accuracy=0.94, UpdateScreen=True):
-        X_offset = 12
-        Y_offset = 12
+        LT_X_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[0]
+        LT_Y_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[1]
+        RT_X_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[2]
+        RT_Y_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[3]
         path_to_currency = self.CurrencyImgData.get(CurrencyName)[0]
             
         LocObject = self.TargetManager.FindLocObject(path_to_currency, Accuracy, NewScreen=UpdateScreen)
@@ -413,9 +426,11 @@ class ActionSpeculate(ActionBase):
         if LocObject:
             LocObject = list(LocObject)
             LT_LocObject = LocObject[0]
-            LocObject[0] = (LT_LocObject[0] - X_offset, LT_LocObject[1] - Y_offset)
+            RT_LocObject = LocObject[1]
+            LocObject[0] = (LT_LocObject[0] - LT_X_offset, LT_LocObject[1] - LT_Y_offset)
+            LocObject[1] = (RT_LocObject[0] - RT_X_offset, RT_LocObject[1] - RT_Y_offset)
             L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
-            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg)[0]) 
+            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0]) 
 
         return CurrencyValue
     
