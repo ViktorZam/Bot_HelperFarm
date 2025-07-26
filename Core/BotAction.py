@@ -197,18 +197,30 @@ class ActionSpeculate(ActionBase):
 
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
+        
+        self.OpenChestTab("Speculate/ExpeditionChestTab.png")
+        LocObject = self.TargetManager.FindLocObject("Speculate/ChestWindow.png", 0.97)
+        if not LocObject is None:
+            pyautogui.press("esc")
+            time.sleep(1)
+        
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png", 0.95)
         if LocObject is None:
             pyautogui.press("i")
+            
+        #self.SetFieldSuggestion(Data.ESideSuggestion.WANT, 0)
+            
+            
             
         LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
         if not LocObject is None:
             pyautogui.press("esc")
             time.sleep(1) 
+
         
         #self.PickingAllCurrency()
         
-        self.UpdateAllCurrencyCountData()
+        #self.UpdateAllCurrencyCountData()
         
             
         self.start()
@@ -324,7 +336,7 @@ class ActionSpeculate(ActionBase):
             pyautogui.click()
             
         pyautogui.keyUp("ctrlleft")     
-    
+
     def MakeScreenWithMask(self, xy_offset_spec_area: tuple, SizeSpecificArea, color_mask=(255,255,255)):
         self.TargetManager.WinCapturing.UpdateScreenshot()
         
@@ -412,8 +424,7 @@ class ActionSpeculate(ActionBase):
             CurrencyValue = 0 
 
         return CurrencyValue
-    
-    
+      
     def GetCountCurrencyFromCurrencyTradeUI(self, CurrencyName: str, Accuracy=0.94, UpdateScreen=True):
         LT_X_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[0]
         LT_Y_offset = self.CurrencyCropOffsetTradeUI.get(CurrencyName)[1]
@@ -478,6 +489,41 @@ class ActionSpeculate(ActionBase):
                 if (not L_CountCurrency is None) and (L_CountCurrency != 0):
                     self.ChangeCountCurrency(Data.EMathOperation.INC, Currency, L_CountCurrency)
                     break
+    
+    def SetFieldSuggestion(self, Side: Data.ESideSuggestion, Value):
+        self.OpenCurrencyTradeWindow()
+        
+        if Side == Data.ESideSuggestion.HAVE:
+            LocField = CalcTarget.HAVE_FIELD_RSIDE_LOC
+        else:
+            LocField = CalcTarget.WANT_FIELD_RSIDE_LOC
+
+        pyautogui.moveTo(LocField[0], LocField[1], 0.5)
+        time.sleep(0.5)
+        pyautogui.click()
+        time.sleep(0.5)
+        pyautogui.keyDown("backspace")
+        time.sleep(2)
+        pyautogui.keyUp("backspace")
+        time.sleep(0.5)
+        SetOfValue = str(Value)
+        if SetOfValue[0] == "0":
+            pyautogui.press("0")
+        else:
+            for number in SetOfValue:
+                pyautogui.press(number)
+                time.sleep(0.5)
+        
+        pyautogui.moveTo(LocField[0], LocField[1] - 30, 0.5)
+        time.sleep(0.5)
+        pyautogui.click()
+    
+    def ChooseCurrencyForSuggestion(self, Side: Data.ESideSuggestion, Currency):
+        self.OpenCurrencyTradeWindow()
+        if Side == Data.ESideSuggestion.HAVE:
+            LocField = CalcTarget.HAVE_FIELD_RSIDE_LOC
+        else:
+            LocField = CalcTarget.WANT_FIELD_RSIDE_LOC
                 
     def run(self):
         while True:

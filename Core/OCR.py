@@ -20,7 +20,7 @@ def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True):
         img = binary_img
  
 
-    cv.imwrite("Debug/" + str(time.time()) + ".png", img)
+    #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     
     result = reader.readtext(img, detail=0, allowlist='0123456789')
     print(result)
