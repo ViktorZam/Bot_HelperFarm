@@ -272,7 +272,7 @@ class ActionSpeculate(ActionBase):
                 pyautogui.click()
                 time.sleep(1)
     
-    def OpenTradeInStockTab(self, trying=0):
+    def OpenSuggestionTab(self, trying=0, SideSug: Data.ESideSuggestion, Tab: Data.ESideSuggestionTab):
         LocObject = self.TargetManager.FindLocObject("Speculate/InStock.png", 1)
         if not LocObject is None:
             return
@@ -289,7 +289,7 @@ class ActionSpeculate(ActionBase):
             self.OpenTradeHaveWindow()
             trying = trying + 1
             if trying < 5:
-                self.OpenTradeInStockTab(trying)
+                self.OpenSuggestionTab(trying, SideSug, Tab)
             else:
                 return
                 
@@ -521,9 +521,9 @@ class ActionSpeculate(ActionBase):
     def ChooseCurrencyForSuggestion(self, Side: Data.ESideSuggestion, Currency):
         self.OpenCurrencyTradeWindow()
         if Side == Data.ESideSuggestion.HAVE:
-            LocField = CalcTarget.HAVE_FIELD_RSIDE_LOC
+            LocCurrencySuggestion = CalcTarget.BUTTON_HAVE_LOC
         else:
-            LocField = CalcTarget.WANT_FIELD_RSIDE_LOC
+            LocCurrencySuggestion = CalcTarget.BUTTON_WANT_LOC
                 
     def run(self):
         while True:

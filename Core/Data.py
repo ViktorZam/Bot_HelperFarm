@@ -1,4 +1,5 @@
 import enum
+import strenum
 
 class EPriorityAction(enum.Enum):
     
@@ -16,3 +17,9 @@ class ESideSuggestion(enum.Enum):
     
     HAVE = 0
     WANT = 1
+
+class ESideSuggestionTab(strenum.StrEnum):
+    
+    IN_STOCK = "Speculate/InStockSugTab.png"
+    CURRENCY = "Speculate/CurrencySugTab.png"
+ 
