@@ -10,30 +10,42 @@ import win32gui
 UNDER_IMG_OFFSET = 110
 
 ######## Alva START ############
-XY_OFFSET_LEFT_WITHDRAWN_COLUMN1 = (278, 302) # local pos for 1024x768
-X_LEN_BETWEEN_WITHDRAWNS = 459 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
-Y_LEN_BETWEEN_2ROWS = 384 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]
-X_LEN_BETWEEN_LEFT_WITHDRAWNS = 536 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
+XY_OFFSET_LEFT_WITHDRAWN_COLUMN1 = (394, 314) # local pos for 1280x800
+X_LEN_BETWEEN_WITHDRAWNS = 587 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
+Y_LEN_BETWEEN_2ROWS = 401 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[1]
+X_LEN_BETWEEN_LEFT_WITHDRAWNS = 666 - XY_OFFSET_LEFT_WITHDRAWN_COLUMN1[0]
 
 MAX_COUNT_ROW_LOTS = 5
 MAX_COUNT_COLUMN_LOTS = 2
 MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
 
-BUTTON_HAVE_LOC = (688, 170)
+BUTTON_HAVE_LOC = (688, 170) # local pos for 1024x768
 BUTTON_WANT_LOC = (336, BUTTON_HAVE_LOC[1])
 
-HAVE_FIELD_CENTER_LOC = (576, 168)
+HAVE_FIELD_CENTER_LOC = (576, 168) # local pos for 1024x768
 HAVE_FIELD_RSIDE_LOC = (HAVE_FIELD_CENTER_LOC[0] + 20, HAVE_FIELD_CENTER_LOC[1])
 WANT_FIELD_CENTER_LOC = (444, HAVE_FIELD_CENTER_LOC[1])
 WANT_FIELD_RSIDE_LOC = (WANT_FIELD_CENTER_LOC[0] + 20, HAVE_FIELD_CENTER_LOC[1])
+
+CURRENT_CURRENCY_RATE_CENTER_LOC = (504, 139)
+CURRENT_CURRENCY_RATE_LT_LOC = (CURRENT_CURRENCY_RATE_CENTER_LOC[0] - 40, CURRENT_CURRENCY_RATE_CENTER_LOC[1] - 8)
+CURRENT_CURRENCY_RATE_RT_LOC = (CURRENT_CURRENCY_RATE_CENTER_LOC[0] + 55, CURRENT_CURRENCY_RATE_CENTER_LOC[1] + 8)
+
+COST_TRADE_CENTER_LOC = (515, 206)
+COST_TRADE_CENTER_LT_LOC = (COST_TRADE_CENTER_LOC[0] - 50, COST_TRADE_CENTER_LOC[1] - 7)
+COST_TRADE_CENTER_RT_LOC = (COST_TRADE_CENTER_LOC[0] + 50, COST_TRADE_CENTER_LOC[1] + 7)
 ######## Alva END ############
 
 ######## Char Inventory START ############
-XY_OFFSET_FIRST_CHAR_INV_SLOT = (581, 438) # local pos for 1024x768
+XY_OFFSET_FIRST_CHAR_INV_SLOT = (819, 455) # local pos for 1280x800
 MAX_COUNT_ROW_CHAR_INV_SLOTS = 5
 MAX_COUNT_COLUMN_CHAR_INV_SLOTS = 12
 MAX_COUNT_CHAR_INV_SLOTS = MAX_COUNT_ROW_CHAR_INV_SLOTS * MAX_COUNT_COLUMN_CHAR_INV_SLOTS
 SIZE_CHAR_INV_SLOT = (cv.imread("Speculate/EmptyInvSlot.png")).shape[0]
+
+GOLD_CENTER_LOC = (920, 652) # local pos for 1280x800
+GOLD_LT_LOC = (GOLD_CENTER_LOC[0] - 120, GOLD_CENTER_LOC[1] - 11)
+GOLD_RT_LOC = (GOLD_CENTER_LOC[0], GOLD_CENTER_LOC[1] + 11)
 ######## Char Inventory END ############
 
 ######## Chest START ############
@@ -161,7 +173,15 @@ class TargetManager:
             if (TypeCoord == ETypeCoord.GLOBAL):
                 L_LocWithdrawn2 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn2)
             L_AllLocsWithdrawn.append(L_LocWithdrawn2)
- 
+            
+        ##################### Debug BEGIN
+        #time.sleep(1)
+        #self.WinCapturing.UpdateScreenshot()
+        #for loc in L_AllLocsWithdrawn:    
+            #cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        #################### Debug END
+        
         return L_AllLocsWithdrawn
  
     def GetAllLocsCharInvSlots(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
@@ -181,7 +201,7 @@ class TargetManager:
         ##################### Debug BEGIN
         #self.WinCapturing.UpdateScreenshot()
         #for loc in L_AllLocsCharInvSlots:    
-        #    cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+            #cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
         #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
         #################### Debug END
         return L_AllLocsCharInvSlots

@@ -13,10 +13,10 @@ class EMathOperation(enum.Enum):
     INC = 1
     DEC = 2 
 
-class ESideSuggestion(enum.Enum):
+class ESideSuggestion(strenum.StrEnum):
     
-    HAVE = 0
-    WANT = 1
+    HAVE = "Speculate/HaveWindow.png"
+    WANT = "Speculate/WantWindow.png"
 
 class ESideSuggestionTab(strenum.StrEnum):
     

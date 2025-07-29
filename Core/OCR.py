@@ -5,8 +5,11 @@ import numpy as np
 
 
 reader = easyocr.Reader(["ru"], False)
+CURRENCY_ALLOW_LIST = '0123456789'
+RATE_CURRENCY_ALLOW_LIST = '0123456789.,:'
 
-def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True):
+
+def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars=CURRENCY_ALLOW_LIST):
     
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     img = cv.resize(img, None, fx=IncSizeImg, fy=IncSizeImg, interpolation=cv.INTER_LANCZOS4)
@@ -22,6 +25,31 @@ def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True):
 
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     
-    result = reader.readtext(img, detail=0, allowlist='0123456789')
+    result = reader.readtext(img, detail=0, allowlist=allowchars)
     print(result)
     return result
+
+def RateStringToNumbers(ocr_string):
+    chars = ""
+    chars = chars.join(ocr_string)
+    chars = list(chars)
+    number_string = ""
+    numbers = []
+    for char in chars:
+        if char != ":":
+            number_string = number_string + char
+            chars.count
+        else:
+            number_string = float(number_string)
+            if (number_string % 1) == 0:
+                number_string = int(number_string)
+
+            numbers.append(number_string)
+            number_string = ""
+     
+    number_string = float(number_string)
+    if (number_string % 1) == 0:
+        number_string = int(number_string) 
+            
+    numbers.append(number_string)
+    return numbers
