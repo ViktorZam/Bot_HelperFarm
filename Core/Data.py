@@ -18,8 +18,9 @@ class ESideSuggestion(strenum.StrEnum):
     HAVE = "Speculate/HaveWindow.png"
     WANT = "Speculate/WantWindow.png"
 
-class ESideSuggestionTab(strenum.StrEnum):
+class ESuggestionTab(strenum.StrEnum):
     
     IN_STOCK = "Speculate/InStockSugTab.png"
     CURRENCY = "Speculate/CurrencySugTab.png"
- 
+    EXPEDITION = "Speculate/ExpeditionSugTab.png"
+

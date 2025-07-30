@@ -183,6 +183,14 @@ class ActionSpeculate(ActionBase):
         "COINS" : None
     }
     
+    CurrencySugTabData = {
+        "DIVINE" : Data.ESuggestionTab.CURRENCY,
+        "CHAOS" : Data.ESuggestionTab.CURRENCY,
+        "EXALT" : Data.ESuggestionTab.CURRENCY, 
+        "ARTIFACT_ORDER" : Data.ESuggestionTab.EXPEDITION,
+        "COINS" : Data.ESuggestionTab.EXPEDITION
+    }
+    
     ENOUGH_COUNT_COINS = 100
     ENOUGH_COUNT_ARTIFACT_EXPEDITION = 5 * ENOUGH_COUNT_COINS
     
@@ -205,17 +213,17 @@ class ActionSpeculate(ActionBase):
             pyautogui.press("esc")
             time.sleep(1)
         
-        LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png", 0.95)
+        LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
         if LocObject is None:
             pyautogui.press("i")
-           
+            time.sleep(1)
+            
         #self.PickingAllCurrency()
         
-        #self.UpdateAllCurrencyCountData()
+        
         
         #self.CheckEnoughGold()
-        self.UpdateCountGold()
-            
+        
         self.start()
         
     def OpenCurrencyTradeWindow(self):
@@ -223,7 +231,7 @@ class ActionSpeculate(ActionBase):
         if not LocObject is None:
             return
 
-        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png", 0.95)
+        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png")
         if not LocObject is None:
             self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
             
@@ -265,7 +273,7 @@ class ActionSpeculate(ActionBase):
                 pyautogui.click()
                 time.sleep(1)
     
-    def OpenSuggestionTab(self, trying=0, SideSug: Data.ESideSuggestion=Data.ESideSuggestion.HAVE, Tab: Data.ESideSuggestionTab=Data.ESideSuggestionTab.IN_STOCK):
+    def OpenSuggestionTab(self, trying=0, SideSug: Data.ESideSuggestion=Data.ESideSuggestion.HAVE, Tab: Data.ESuggestionTab=Data.ESuggestionTab.IN_STOCK):
         SideSuggestion = SideSug
             
         LocObject = self.TargetManager.FindLocObject(Tab, 0.998)
@@ -325,11 +333,14 @@ class ActionSpeculate(ActionBase):
     def ClearChest(self):
         self.OpenChest()
         L_AllLocsCharInvSlots = self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.GLOBAL)
+        debug_counter = 0
         pyautogui.keyDown("ctrlleft")
         for loc in L_AllLocsCharInvSlots:
             pyautogui.moveTo(loc[0], loc[1], 0.2)
             time.sleep(0.2)
             pyautogui.click()
+            debug_counter = debug_counter + 1
+            print("Click to cell charInv: ", debug_counter)
             
         pyautogui.keyUp("ctrlleft")     
 
@@ -343,23 +354,23 @@ class ActionSpeculate(ActionBase):
             if value == 1:
                 X_LT_CoordRectangle = 0
                 Y_LT_CoordRectangle = 0
-                X_RD_CoordRectangle = int(xy_offset_spec_area[0] - ((SizeSpecificArea/2) + 5))
+                X_RD_CoordRectangle = int(xy_offset_spec_area[0] - ((SizeSpecificArea/2) + 1))
                 Y_RD_CoordRectangle = heightScreen
                 
             elif value == 2:
                 X_LT_CoordRectangle = 0
                 Y_LT_CoordRectangle = 0
                 X_RD_CoordRectangle = widthScreen
-                Y_RD_CoordRectangle = int(xy_offset_spec_area[1] - ((SizeSpecificArea/2) + 5))
+                Y_RD_CoordRectangle = int(xy_offset_spec_area[1] - ((SizeSpecificArea/2) + 1))
                 
             elif value == 3:
                 X_LT_CoordRectangle = 0
-                Y_LT_CoordRectangle = int(xy_offset_spec_area[1] + ((SizeSpecificArea/2) + 5))
+                Y_LT_CoordRectangle = int(xy_offset_spec_area[1] + ((SizeSpecificArea/2) + 1))
                 X_RD_CoordRectangle = widthScreen
                 Y_RD_CoordRectangle = heightScreen
                 
             elif value == 4:
-                X_LT_CoordRectangle = int(xy_offset_spec_area[0] + ((SizeSpecificArea/2) + 5))
+                X_LT_CoordRectangle = int(xy_offset_spec_area[0] + ((SizeSpecificArea/2) + 1))
                 Y_LT_CoordRectangle = 0
                 X_RD_CoordRectangle = widthScreen
                 Y_RD_CoordRectangle = heightScreen
@@ -453,9 +464,13 @@ class ActionSpeculate(ActionBase):
         self.OpenCurrencyTradeWindow()
         
         if Side == Data.ESideSuggestion.HAVE:
-            LocField = CalcTarget.HAVE_FIELD_RSIDE_LOC
+            LocField = CalcTarget.HAVE_FIELD_CENTER_LOC
+            LT_LocField = CalcTarget.HAVE_FIELD_LT_LOC
+            RT_LocField = CalcTarget.HAVE_FIELD_RT_LOC
         else:
-            LocField = CalcTarget.WANT_FIELD_RSIDE_LOC
+            LocField = CalcTarget.WANT_FIELD_CENTER_LOC
+            LT_LocField = CalcTarget.WANT_FIELD_LT_LOC
+            RT_LocField = CalcTarget.WANT_FIELD_RT_LOC
 
         GlobalLocField = self.TargetManager.ConvertLocalCoordToGlobal(LocField)
         pyautogui.moveTo(GlobalLocField[0], GlobalLocField[1], 0.5)
@@ -481,14 +496,23 @@ class ActionSpeculate(ActionBase):
         pyautogui.moveTo(GlobalLocField[0], GlobalLocField[1] + 30, 0.5)
         time.sleep(0.5)
         pyautogui.click()
+        
+        if Value > 0:
+            self.TargetManager.WinCapturing.UpdateScreenshot()
+            L_CropImg = self.TargetManager.WinCapturing.CropImg(LT_LocField, RT_LocField)   
+            enter_count_currency = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
+            if enter_count_currency != Value:
+                l_side = Side
+                l_value = Value
+                self.SetFieldSuggestion(l_side, l_value)  
     
     def ConfirmFieldSuggestion(self, Side: Data.ESideSuggestion):
         self.OpenCurrencyTradeWindow()
         
         if Side == Data.ESideSuggestion.HAVE:
-            LocField = CalcTarget.HAVE_FIELD_RSIDE_LOC
+            LocField = CalcTarget.HAVE_FIELD_CENTER_LOC
         else:
-            LocField = CalcTarget.WANT_FIELD_RSIDE_LOC
+            LocField = CalcTarget.WANT_FIELD_CENTER_LOC
 
         GlobalLocField = self.TargetManager.ConvertLocalCoordToGlobal(LocField)
         pyautogui.moveTo(GlobalLocField[0], GlobalLocField[1], 0.5)
@@ -502,11 +526,12 @@ class ActionSpeculate(ActionBase):
     def SetCurrencyForSuggestion(self, Side: Data.ESideSuggestion, CurrencyName):
         self.OpenCurrencyTradeWindow()
         if Side == Data.ESideSuggestion.HAVE:
-            self.OpenSuggestionTab(SideSug=Side, Tab=Data.ESideSuggestionTab.IN_STOCK)
+            self.OpenSuggestionTab(SideSug=Side, Tab=Data.ESuggestionTab.IN_STOCK)
         else:
-            self.OpenSuggestionTab(SideSug=Side, Tab=Data.ESideSuggestionTab.CURRENCY)
+            sug_tab = self.CurrencySugTabData.get(CurrencyName)
+            self.OpenSuggestionTab(SideSug=Side, Tab=sug_tab)
         
-        path_to_currency = self.CurrencyImgData.get(CurrencyName)[1]
+        path_to_currency = self.CurrencyImgData.get(CurrencyName)
         LocObject = self.TargetManager.FindLocObject(path_to_currency)
         if LocObject:
             self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
@@ -644,8 +669,8 @@ class ActionSpeculate(ActionBase):
                 break
             
 
-                           
-            #self.FillStockExpeditionCurrency()
+            self.UpdateAllCurrencyCountData()               
+            self.FillStockExpeditionCurrency()
             time.sleep(2)
             
             ##################### Debug BEGIN

@@ -6,6 +6,7 @@ import time
 from Core import WindowCapture as WinCap
 import numpy
 import win32gui
+import pyautogui
 
 UNDER_IMG_OFFSET = 110
 
@@ -19,25 +20,27 @@ MAX_COUNT_ROW_LOTS = 5
 MAX_COUNT_COLUMN_LOTS = 2
 MAX_COUNT_LOTS = MAX_COUNT_ROW_LOTS * MAX_COUNT_COLUMN_LOTS
 
-BUTTON_HAVE_LOC = (688, 170) # local pos for 1024x768
-BUTTON_WANT_LOC = (336, BUTTON_HAVE_LOC[1])
+BUTTON_HAVE_LOC = (820, 177) # local pos for 1024x768
+BUTTON_WANT_LOC = (450, BUTTON_HAVE_LOC[1])
 
-HAVE_FIELD_CENTER_LOC = (576, 168) # local pos for 1024x768
-HAVE_FIELD_RSIDE_LOC = (HAVE_FIELD_CENTER_LOC[0] + 20, HAVE_FIELD_CENTER_LOC[1])
-WANT_FIELD_CENTER_LOC = (444, HAVE_FIELD_CENTER_LOC[1])
-WANT_FIELD_RSIDE_LOC = (WANT_FIELD_CENTER_LOC[0] + 20, HAVE_FIELD_CENTER_LOC[1])
+HAVE_FIELD_CENTER_LOC = (705, 179) # local pos for 1280x800
+HAVE_FIELD_LT_LOC = (HAVE_FIELD_CENTER_LOC[0] - 25, HAVE_FIELD_CENTER_LOC[1] - 11)
+HAVE_FIELD_RT_LOC = (HAVE_FIELD_CENTER_LOC[0] + 30, HAVE_FIELD_CENTER_LOC[1] + 11)
+WANT_FIELD_CENTER_LOC = (570, HAVE_FIELD_CENTER_LOC[1])
+WANT_FIELD_LT_LOC = (WANT_FIELD_CENTER_LOC[0] - 25, WANT_FIELD_CENTER_LOC[1] - 11)
+WANT_FIELD_RT_LOC = (WANT_FIELD_CENTER_LOC[0] + 30, WANT_FIELD_CENTER_LOC[1] + 11)
 
-CURRENT_CURRENCY_RATE_CENTER_LOC = (504, 139)
+CURRENT_CURRENCY_RATE_CENTER_LOC = (636, 144)
 CURRENT_CURRENCY_RATE_LT_LOC = (CURRENT_CURRENCY_RATE_CENTER_LOC[0] - 40, CURRENT_CURRENCY_RATE_CENTER_LOC[1] - 8)
 CURRENT_CURRENCY_RATE_RT_LOC = (CURRENT_CURRENCY_RATE_CENTER_LOC[0] + 55, CURRENT_CURRENCY_RATE_CENTER_LOC[1] + 8)
 
-COST_TRADE_CENTER_LOC = (515, 206)
+COST_TRADE_CENTER_LOC = (CURRENT_CURRENCY_RATE_CENTER_LOC[0], 214)
 COST_TRADE_CENTER_LT_LOC = (COST_TRADE_CENTER_LOC[0] - 50, COST_TRADE_CENTER_LOC[1] - 7)
 COST_TRADE_CENTER_RT_LOC = (COST_TRADE_CENTER_LOC[0] + 50, COST_TRADE_CENTER_LOC[1] + 7)
 ######## Alva END ############
 
 ######## Char Inventory START ############
-XY_OFFSET_FIRST_CHAR_INV_SLOT = (819, 455) # local pos for 1280x800
+XY_OFFSET_FIRST_CHAR_INV_SLOT = (820, 457) # local pos for 1280x800
 MAX_COUNT_ROW_CHAR_INV_SLOTS = 5
 MAX_COUNT_COLUMN_CHAR_INV_SLOTS = 12
 MAX_COUNT_CHAR_INV_SLOTS = MAX_COUNT_ROW_CHAR_INV_SLOTS * MAX_COUNT_COLUMN_CHAR_INV_SLOTS
@@ -168,18 +171,21 @@ class TargetManager:
             L_LocWithdrawn1[0] = L_LeftTopLocWithdrawn[0] + ((LotIndex + 1) % 2) * X_LEN_BETWEEN_LEFT_WITHDRAWNS
             if (TypeCoord == ETypeCoord.GLOBAL):
                 L_LocWithdrawn1 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn1)
+                L_LocWithdrawn2[1] = L_LocWithdrawn1[1]
             L_AllLocsWithdrawn.append(L_LocWithdrawn1)
             L_LocWithdrawn2[0] = L_LocWithdrawn1[0] + X_LEN_BETWEEN_WITHDRAWNS
-            if (TypeCoord == ETypeCoord.GLOBAL):
-                L_LocWithdrawn2 = self.ConvertLocalCoordToGlobal(L_LocWithdrawn2)
+            
             L_AllLocsWithdrawn.append(L_LocWithdrawn2)
             
         ##################### Debug BEGIN
         #time.sleep(1)
         #self.WinCapturing.UpdateScreenshot()
+        #screen = pyautogui.screenshot()
+        #screen = numpy.array(screen)
+        #screen = cv.cvtColor(screen, cv.COLOR_RGB2BGR)
         #for loc in L_AllLocsWithdrawn:    
-            #cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+            #cv.drawMarker(screen, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #cv.imwrite("Debug/" + str(time.time()) + ".png", screen)
         #################### Debug END
         
         return L_AllLocsWithdrawn
