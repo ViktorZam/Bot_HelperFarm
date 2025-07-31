@@ -10,6 +10,7 @@ from Core import CalcTarget
 import cv2 as cv
 import sys
 from Core import OCR
+from Core import BotFuncs
 
 class EStateCheckAction(enum.Enum):
     
@@ -167,6 +168,8 @@ class ActionLoot(ActionCheckReady):
             
 class ActionSpeculate(ActionBase):
     
+    GeneralFuncs = None
+    
     CurrencyImgData = {
         "DIVINE" : "Speculate/Currency/DivineInStock.png",
         "CHAOS" : "Speculate/Currency/ChaosInStock.png",
@@ -201,24 +204,20 @@ class ActionSpeculate(ActionBase):
 
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
+        self.GeneralFuncs = BotFuncs.General(self.TargetManager)
         
-        LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
-        if not LocObject is None:
-            pyautogui.press("esc")
-            time.sleep(1) 
-
-        self.OpenChestTab("Speculate/ExpeditionChestTab.png")
-        LocObject = self.TargetManager.FindLocObject("Speculate/ChestWindow.png", 0.97)
-        if not LocObject is None:
-            pyautogui.press("esc")
-            time.sleep(1)
+        
+        self.GeneralFuncs.CloseWindow(Data.EWindow.TRADE_CURRENCY_WINDOW)
+        
+        self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
+        self.GeneralFuncs.CloseWindow(Data.EWindow.CHEST_WINDOW)
         
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
         if LocObject is None:
             pyautogui.press("i")
             time.sleep(1)
             
-        #self.PickingAllCurrency()
+        self.PickingAllCurrency()
         
         
         
@@ -231,7 +230,7 @@ class ActionSpeculate(ActionBase):
         if not LocObject is None:
             return
 
-        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png")
+        LocObject = self.TargetManager.FindLocObject("Speculate/Alva.png", 0.93)
         if not LocObject is None:
             self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
             
@@ -246,32 +245,6 @@ class ActionSpeculate(ActionBase):
                     pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
                     time.sleep(0.5)
                     pyautogui.click()
-    
-    def OpenChest(self):
-        LocObject = self.TargetManager.FindLocObject("Speculate/ChestWindow.png", 0.97)
-        if not LocObject is None:
-            return
-        
-        LocObject = self.TargetManager.FindLocObject("Speculate/Chest.png")
-        if not LocObject is None:
-            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-            
-            if self.TargetLoc:
-                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
-                time.sleep(0.5)
-                pyautogui.click()
-                time.sleep(1)
-    
-    def OpenChestTab(self, path_img_tab):
-        self.OpenChest()
-        LocObject = self.TargetManager.FindLocObject(path_img_tab)
-        if not LocObject is None:
-            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-            if self.TargetLoc:
-                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
-                time.sleep(0.5)
-                pyautogui.click()
-                time.sleep(1)
     
     def OpenSuggestionTab(self, trying=0, SideSug: Data.ESideSuggestion=Data.ESideSuggestion.HAVE, Tab: Data.ESuggestionTab=Data.ESuggestionTab.IN_STOCK):
         SideSuggestion = SideSug
@@ -330,8 +303,8 @@ class ActionSpeculate(ActionBase):
             pyautogui.keyUp("ctrlleft")
             time.sleep(0.1)
     
-    def ClearChest(self):
-        self.OpenChest()
+    def ClearCharInv(self):
+        self.GeneralFuncs.OpenChest()
         L_AllLocsCharInvSlots = self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.GLOBAL)
         debug_counter = 0
         pyautogui.keyDown("ctrlleft")
@@ -389,12 +362,40 @@ class ActionSpeculate(ActionBase):
         else:
             return False
 
+    def IsEnoughGold(self):
+        self.UpdateCountGold()
+        ReqruiredGold = 0
+        reqruid_count_exalts = 0
+        want_currencies = ("COINS", "ARTIFACT_ORDER", "EXALT")
+        have_currency_name = None
+        want_count_currency = None
+        for  want_currency_name in want_currencies:
+            if want_currency_name == "COINS":
+                have_currency_name = "EXALT"
+                want_count_currency = self.ENOUGH_COUNT_COINS
+                
+            elif want_currency_name == "ARTIFACT_ORDER":
+                have_currency_name = "EXALT"
+                want_count_currency = self.ENOUGH_COUNT_ARTIFACT_EXPEDITION
+
+            elif want_currency_name == "EXALT":
+                have_currency_name = "CHAOS"
+                want_count_currency = reqruid_count_exalts
+        
+            ReqruiredGold = ReqruiredGold + self.GetCostDeal(have_currency_name, None, want_currency_name, want_count_currency)
+            if want_currency_name != "EXALT":
+                L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.HAVE_FIELD_LT_LOC, CalcTarget.HAVE_FIELD_RT_LOC)  
+                reqruid_count_exalts = reqruid_count_exalts + int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
+        
+        print("Required gold for 1 deal: ", ReqruiredGold)
+        return self.Gold >= ReqruiredGold
+
     def PickingAllCurrency(self):
         IsTradeCurrencyEmpty = False
         IsEmptyCharInv = False
         
         while (IsTradeCurrencyEmpty and IsEmptyCharInv) != True:
-            LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.52)
+            LocObject = self.TargetManager.FindLocObject("Speculate/TradeComplete.png", 0.53)
             if not LocObject is None:
                 self.PickingCurrencyFromAlvaTradeWindow()
             else:
@@ -408,10 +409,17 @@ class ActionSpeculate(ActionBase):
             IsEmptyCharInv = self.IsEmptyCharInv()
             
             if (IsEmptyCharInv == False):
-                self.ClearChest()
-                pyautogui.press("esc") #close chest window
+                self.ClearCharInv()
+                pyautogui.press("esc") #close chest window and charInv
+                time.sleep(1)
+                pyautogui.press("i")
                 time.sleep(1)
                 IsEmptyCharInv = True
+        
+        LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
+        if LocObject is None:
+            pyautogui.press("i")
+            time.sleep(1)
     
     def GetCurrencyFromInStockUI(self, CurrencyName: str):
         path_to_currency = self.CurrencyImgData.get(CurrencyName)
@@ -431,6 +439,19 @@ class ActionSpeculate(ActionBase):
             CurrencyValue = 0 
 
         return CurrencyValue
+    
+    def GetCostDeal(self, have_currency_name, have_currency_count=None, want_currency_name=None, want_currency_count=None):
+        L_have_currency_name = have_currency_name
+        L_have_currency_count = have_currency_count
+        L_want_currency_name = want_currency_name
+        L_want_currency_count = want_currency_count
+        self.SetSuggestion(have_currency_name=L_have_currency_name, have_currency_count=L_have_currency_count,
+                           want_currency_name=L_want_currency_name, want_currency_count=L_want_currency_count)
+        
+        self.TargetManager.WinCapturing.UpdateScreenshot()
+        L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.COST_TRADE_CENTER_LT_LOC, CalcTarget.COST_TRADE_CENTER_RT_LOC)   
+        cost_deal = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
+        return cost_deal
     
     def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, CurrencyName: str, Value):
         if MathOperation == Data.EMathOperation.SET:
@@ -541,11 +562,41 @@ class ActionSpeculate(ActionBase):
                 pyautogui.click()
                 time.sleep(1)
     
+    def SetSuggestion(self, have_currency_name, have_currency_count=None, want_currency_name=None, want_currency_count=None):
+        L_have_currency_count = have_currency_count
+        L_want_currency_count = want_currency_count
+        
+        self.UpdateRateCurrencyCache(have_currency_name, want_currency_name)
+        is_want_confirm_currency = True
+        
+        if L_want_currency_count is None:
+                is_want_confirm_currency = True 
+           
+        elif L_have_currency_count is None:
+            if self.RateCurrencyCache > L_want_currency_count:
+                is_want_confirm_currency = True
+                L_have_currency_count = 1
+            else:
+                if self.RateCurrencyCache > 1:
+                    L_have_currency_count = math.ceil(L_want_currency_count / self.RateCurrencyCache)
+                    is_want_confirm_currency = True  
+                else:
+                    is_want_confirm_currency = False    
+             
+        if is_want_confirm_currency:
+            self.SetFieldSuggestion(Data.ESideSuggestion.HAVE, L_have_currency_count)
+            self.SetFieldSuggestion(Data.ESideSuggestion.WANT, 0) 
+            self.ConfirmFieldSuggestion(Data.ESideSuggestion.WANT)
+        else:
+            self.SetFieldSuggestion(Data.ESideSuggestion.WANT, L_want_currency_count)
+            self.SetFieldSuggestion(Data.ESideSuggestion.HAVE, 0) 
+            self.ConfirmFieldSuggestion(Data.ESideSuggestion.HAVE)
+    
     def UpdateRateCurrencyCache(self, have_slot_currency_name, want_slot_currency_name):
         self.SetCurrencyForSuggestion(Data.ESideSuggestion.HAVE, have_slot_currency_name)    
         self.SetCurrencyForSuggestion(Data.ESideSuggestion.WANT, want_slot_currency_name)
         L_GlobalZeroCoord = self.TargetManager.ConvertLocalCoordToGlobal([0, 0])
-        pyautogui.moveTo(L_GlobalZeroCoord[0], L_GlobalZeroCoord[1], 1)
+        pyautogui.moveTo(L_GlobalZeroCoord[0], L_GlobalZeroCoord[1], 0.5)
         time.sleep(1)    
         self.TargetManager.WinCapturing.UpdateScreenshot()
         L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.CURRENT_CURRENCY_RATE_LT_LOC, CalcTarget.CURRENT_CURRENCY_RATE_RT_LOC)   
@@ -582,31 +633,13 @@ class ActionSpeculate(ActionBase):
                 time.sleep(1)
     
     def BuyCurrency(self, have_currency_name, have_currency_count=None, want_currency_name=None, want_currency_count=None):
+        L_have_currency_name = have_currency_name
         L_have_currency_count = have_currency_count
+        L_want_currency_name = want_currency_name
         L_want_currency_count = want_currency_count
         
-        self.UpdateRateCurrencyCache(have_currency_name, want_currency_name)
-        is_want_confirm_currency = True
-        
-        self.RateCurrencyCache
-        if L_want_currency_count is None:
-                is_want_confirm_currency = True 
-           
-        elif L_have_currency_count is None:
-            if self.RateCurrencyCache > want_currency_count:
-                is_want_confirm_currency = True
-                L_have_currency_count = 1
-            else:
-                is_want_confirm_currency = False    
-             
-        if is_want_confirm_currency:
-            self.SetFieldSuggestion(Data.ESideSuggestion.HAVE, L_have_currency_count)
-            self.SetFieldSuggestion(Data.ESideSuggestion.WANT, 0) 
-            self.ConfirmFieldSuggestion(Data.ESideSuggestion.WANT)
-        else:
-            self.SetFieldSuggestion(Data.ESideSuggestion.WANT, L_want_currency_count)
-            self.SetFieldSuggestion(Data.ESideSuggestion.HAVE, 0) 
-            self.ConfirmFieldSuggestion(Data.ESideSuggestion.HAVE)
+        self.SetSuggestion(have_currency_name=L_have_currency_name, have_currency_count=L_have_currency_count,
+                           want_currency_name=L_want_currency_name, want_currency_count=L_want_currency_count)
         
         self.PlaceLot()   
         LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
@@ -622,20 +655,7 @@ class ActionSpeculate(ActionBase):
             time.sleep(3)
         self.PickingAllCurrency()
         return 
-       
-    def CheckEnoughGold(self):
-        self.UpdateCountGold() 
-        self.UpdateRateCurrencyCache(self.PrimaryCurrency, self.SecondaryCurrency)
-        self.SetFieldSuggestion(Data.ESideSuggestion.HAVE, 1)
-        self.SetFieldSuggestion(Data.ESideSuggestion.WANT, 0)
-        self.ConfirmFieldSuggestion(Data.ESideSuggestion.WANT)
-        self.TargetManager.WinCapturing.UpdateScreenshot()
-        L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.COST_TRADE_CENTER_LT_LOC, CalcTarget.COST_TRADE_CENTER_RT_LOC)   
-        cost_deal = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
-        count_primary_currency = self.CurrencyCountData.get(self.PrimaryCurrency)
-        RequiredAmountGoldForDeal = cost_deal * count_primary_currency
-        print(RequiredAmountGoldForDeal)
-    
+         
     def FillStockExpeditionCurrency(self):
         
         ExpeditionCurrencies = ("COINS", "ARTIFACT_ORDER")
@@ -662,6 +682,10 @@ class ActionSpeculate(ActionBase):
                     
                     self.BuyCurrency("EXALT", RequiredCountExalt, want_currency_name=expedition_currency_name)
                 
+    def GoldMining(self):
+        self.GeneralFuncs.CloseWindow(Data.EWindow.TRADE_CURRENCY_WINDOW)
+        self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
+        
            
     def run(self):
         while True:
@@ -671,6 +695,14 @@ class ActionSpeculate(ActionBase):
 
             self.UpdateAllCurrencyCountData()               
             self.FillStockExpeditionCurrency()
+            if ((self.CurrencyCountData.get("COINS") >= self.ENOUGH_COUNT_COINS) 
+                and (self.CurrencyCountData.get("ARTIFACT_ORDER") >= self.ENOUGH_COUNT_ARTIFACT_EXPEDITION)):
+                
+                if self.IsEnoughGold():
+                    print("HELLO")
+                
+                
+                
             time.sleep(2)
             
             ##################### Debug BEGIN

@@ -9,7 +9,7 @@ CURRENCY_ALLOW_LIST = '0123456789'
 RATE_CURRENCY_ALLOW_LIST = '0123456789.,:'
 
 
-def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars=CURRENCY_ALLOW_LIST):
+def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars=CURRENCY_ALLOW_LIST, check_paragraph=False):
     
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     img = cv.resize(img, None, fx=IncSizeImg, fy=IncSizeImg, interpolation=cv.INTER_LANCZOS4)
@@ -25,7 +25,7 @@ def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars
 
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     
-    result = reader.readtext(img, detail=0, allowlist=allowchars)
+    result = reader.readtext(img, detail=0, allowlist=allowchars, paragraph=check_paragraph)
     print(result)
     return result
 
