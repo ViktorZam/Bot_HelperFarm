@@ -28,6 +28,14 @@ class EWindow(strenum.StrEnum):
     
     TRADE_CURRENCY_WINDOW = "Speculate/TradeCurrencyWindow.png"
     CHEST_WINDOW = "Speculate/ChestWindow.png"
+    EXPEDITION_DEAL_WINDOW = "Speculate/ExpeditionDealWindow.png"
+    ROG_WINDOW = "Speculate/RogWindow.png"
+
+ACCORDANCE_WINDOW_AND_CHAR = {
+    EWindow.ROG_WINDOW : "Speculate/Rog.png",
+    
+}
+
 
 WINDOW_ACCURACY_EQUAL_DATA = {
     EWindow.TRADE_CURRENCY_WINDOW : 0.94,
@@ -38,18 +46,23 @@ class ETab(strenum.StrEnum):
     
     EXPEDITION_CHEST_TAB = "Speculate/ExpeditionChestTab.png"
 
-class ECurrencyImgPath(enum.Enum):
+class ECurrencyName(strenum.StrEnum):
     
-    DIVINE = 0
-    CHAOS = 1
-    EXALT = 2
-    ARTIFACT_ORDER = 3
-    COINS = 4
+    DIVINE = "DIVINE"
+    CHAOS = "CHAOS"
+    EXALT = "EXALT"
+    ARTIFACT_ORDER = "ARTIFACT_ORDER"
+    COINS = "COINS"
 
 CURRENCY_IMG_PATH = {
-    ECurrencyImgPath.DIVINE : ("Speculate/Currency/DivineInStock.png"),
-    ECurrencyImgPath.CHAOS : ("Speculate/Currency/ChaosInStock.png"),
-    ECurrencyImgPath.EXALT : ("Speculate/Currency/ExaltInStock.png"),
-    ECurrencyImgPath.ARTIFACT_ORDER : ("Speculate/Currency/ArtifactOrderInStock.png", "Speculate/Currency/ArtifactOrderInv.png"),
-    ECurrencyImgPath.COINS : ("Speculate/Currency/CoinsInStock.png", "Speculate/Currency/CoinsInv.png")
+    ECurrencyName.DIVINE : ("Speculate/Currency/DivineInStock.png", "Speculate/Currency/ArtifactOrderInv.png"),
+    ECurrencyName.CHAOS : ("Speculate/Currency/ChaosInStock.png", "Speculate/Currency/ArtifactOrderInv.png"),
+    ECurrencyName.EXALT : ("Speculate/Currency/ExaltInStock.png", "Speculate/Currency/ArtifactOrderInv.png"),
+    ECurrencyName.ARTIFACT_ORDER : ("Speculate/Currency/ArtifactOrderInStock.png", "Speculate/Currency/ArtifactOrderInv.png"),
+    ECurrencyName.COINS : ("Speculate/Currency/CoinsInStock.png", "Speculate/Currency/CoinsInv.png")
 }
+
+class ETypePickCurrency(enum.Enum):
+    
+    ONE_STACK = 0
+    ALL = 1

@@ -169,6 +169,7 @@ class ActionLoot(ActionCheckReady):
 class ActionSpeculate(ActionBase):
     
     GeneralFuncs = None
+    ExpeditionFuncs = None
     
     CurrencyImgData = {
         "DIVINE" : "Speculate/Currency/DivineInStock.png",
@@ -194,6 +195,15 @@ class ActionSpeculate(ActionBase):
         "COINS" : Data.ESuggestionTab.EXPEDITION
     }
     
+    CurrencyOCRData = {
+        #                           LT_Offset   RT_Offset filters
+        Data.ECurrencyName.DIVINE : ((-5, -10), (0, -10), True),
+        Data.ECurrencyName.CHAOS : ((-5, -10), (0, -10), True),
+        Data.ECurrencyName.EXALT : ((-5, -10), (0, -10), True),
+        Data.ECurrencyName.ARTIFACT_ORDER : ((-5, -10), (0, -17), False),
+        Data.ECurrencyName.COINS : ((-5, -10), (0, -10), True),
+    }
+    
     ENOUGH_COUNT_COINS = 100
     ENOUGH_COUNT_ARTIFACT_EXPEDITION = 5 * ENOUGH_COUNT_COINS
     
@@ -201,10 +211,16 @@ class ActionSpeculate(ActionBase):
     PrimaryCurrency = sys.argv[1]
     SecondaryCurrency = sys.argv[2] 
     RateCurrencyCache = 1
+    
+    SetedCurrencyCache = {
+        Data.ESideSuggestion.HAVE : None,
+        Data.ESideSuggestion.WANT : None,
+    }
 
     def __init__(self, TargetManager:  CalcTarget.TargetManager):
         super().__init__(TargetManager)
         self.GeneralFuncs = BotFuncs.General(self.TargetManager)
+        self.ExpeditionFuncs = BotFuncs.Expedition(self.TargetManager)
         
         
         self.GeneralFuncs.CloseWindow(Data.EWindow.TRADE_CURRENCY_WINDOW)
@@ -215,15 +231,13 @@ class ActionSpeculate(ActionBase):
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
         if LocObject is None:
             pyautogui.press("i")
-            time.sleep(1)
+            time.sleep(1.5)
             
-        self.PickingAllCurrency()
-        
-        
-        
-        #self.CheckEnoughGold()
-        
-        self.start()
+        #self.PickingAllCurrency()
+
+        #self.start()
+        self.ExpeditionFuncs.OpenExpeditionWindow(Data.EWindow.ROG_WINDOW)
+        self.ExpeditionFuncs.EnterFilter()
         
     def OpenCurrencyTradeWindow(self):
         LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
@@ -384,6 +398,7 @@ class ActionSpeculate(ActionBase):
         
             ReqruiredGold = ReqruiredGold + self.GetCostDeal(have_currency_name, None, want_currency_name, want_count_currency)
             if want_currency_name != "EXALT":
+                self.TargetManager.WinCapturing.UpdateScreenshot()
                 L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.HAVE_FIELD_LT_LOC, CalcTarget.HAVE_FIELD_RT_LOC)  
                 reqruid_count_exalts = reqruid_count_exalts + int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
         
@@ -413,7 +428,7 @@ class ActionSpeculate(ActionBase):
                 pyautogui.press("esc") #close chest window and charInv
                 time.sleep(1)
                 pyautogui.press("i")
-                time.sleep(1)
+                time.sleep(1.5)
                 IsEmptyCharInv = True
         
         LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
@@ -421,12 +436,13 @@ class ActionSpeculate(ActionBase):
             pyautogui.press("i")
             time.sleep(1)
     
-    def GetCurrencyFromInStockUI(self, CurrencyName: str):
-        path_to_currency = self.CurrencyImgData.get(CurrencyName)
+    def GetCurrencyFromInStockUI(self, Currency: Data.ECurrencyName):
+        path_to_currency = Data.CURRENCY_IMG_PATH.get(Currency)[0]
         LocObject = self.TargetManager.FindLocObject(path_to_currency)
         CurrencyValue = None
-        LT_Offset = [-5, -10]
-        RT_Offset = [0, -10]
+        LT_Offset = self.CurrencyOCRData.get(Currency)[0]
+        RT_Offset = self.CurrencyOCRData.get(Currency)[1]
+        L_filters = self.CurrencyOCRData.get(Currency)[2]
         if LocObject:
             LocObject = list(LocObject)
             LT_LocObject = LocObject[0]
@@ -434,7 +450,7 @@ class ActionSpeculate(ActionBase):
             LocObject[0] = (LT_LocObject[0] + LT_Offset[0], LT_LocObject[1] + LT_Offset[1])
             LocObject[1] = (RT_LocObject[0] + RT_Offset[0], RT_LocObject[1] + RT_Offset[1])  
             L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
-            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, filters=False, IncSizeImg=25)[0])
+            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25, filters=L_filters)[0])
         else:
             CurrencyValue = 0 
 
@@ -453,26 +469,26 @@ class ActionSpeculate(ActionBase):
         cost_deal = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
         return cost_deal
     
-    def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, CurrencyName: str, Value):
+    def ChangeCountCurrency(self, MathOperation: Data.EMathOperation, Currency: Data.ECurrencyName, Value):
         if MathOperation == Data.EMathOperation.SET:
             L_NewCurrencyCount = Value
         elif MathOperation == Data.EMathOperation.INC:
-            if not self.CurrencyCountData.get(CurrencyName) is None:
-                L_NewCurrencyCount = self.CurrencyCountData.get(CurrencyName) + Value
+            if not self.CurrencyCountData.get(Currency) is None:
+                L_NewCurrencyCount = self.CurrencyCountData.get(Currency) + Value
             else:
                 L_NewCurrencyCount = Value
         elif MathOperation == Data.EMathOperation.DEC:
-            if not self.CurrencyCountData.get(CurrencyName) is None:
-                L_NewCurrencyCount = self.CurrencyCountData.get(CurrencyName) - Value
+            if not self.CurrencyCountData.get(Currency) is None:
+                L_NewCurrencyCount = self.CurrencyCountData.get(Currency) - Value
             else:
                 L_NewCurrencyCount = 0
 
-        self.CurrencyCountData[CurrencyName] = L_NewCurrencyCount
+        self.CurrencyCountData[Currency] = L_NewCurrencyCount
         print(self.CurrencyCountData)    
         
     def UpdateAllCurrencyCountData(self):
         self.OpenSuggestionTab()
-        for Currency in list(self.CurrencyCountData.keys()):
+        for Currency in list(Data.CURRENCY_IMG_PATH.keys()):
             L_CountCurrency = self.GetCurrencyFromInStockUI(Currency)
             self.ChangeCountCurrency(Data.EMathOperation.SET, Currency, L_CountCurrency)
         
@@ -546,21 +562,25 @@ class ActionSpeculate(ActionBase):
     
     def SetCurrencyForSuggestion(self, Side: Data.ESideSuggestion, CurrencyName):
         self.OpenCurrencyTradeWindow()
-        if Side == Data.ESideSuggestion.HAVE:
-            self.OpenSuggestionTab(SideSug=Side, Tab=Data.ESuggestionTab.IN_STOCK)
-        else:
-            sug_tab = self.CurrencySugTabData.get(CurrencyName)
-            self.OpenSuggestionTab(SideSug=Side, Tab=sug_tab)
+        if CurrencyName != self.SetedCurrencyCache.get(Side):
         
-        path_to_currency = self.CurrencyImgData.get(CurrencyName)
-        LocObject = self.TargetManager.FindLocObject(path_to_currency)
-        if LocObject:
-            self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
-            if self.TargetLoc:
-                pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
-                time.sleep(0.5)
-                pyautogui.click()
-                time.sleep(1)
+            if Side == Data.ESideSuggestion.HAVE:
+                self.OpenSuggestionTab(SideSug=Side, Tab=Data.ESuggestionTab.IN_STOCK)
+            else:
+                sug_tab = self.CurrencySugTabData.get(CurrencyName)
+                self.OpenSuggestionTab(SideSug=Side, Tab=sug_tab)
+            
+            path_to_currency = self.CurrencyImgData.get(CurrencyName)
+            LocObject = self.TargetManager.FindLocObject(path_to_currency)
+            if LocObject:
+                self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+                if self.TargetLoc:
+                    pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                    time.sleep(0.5)
+                    pyautogui.click()
+                    time.sleep(1)
+
+            self.SetedCurrencyCache[Side] = CurrencyName
     
     def SetSuggestion(self, have_currency_name, have_currency_count=None, want_currency_name=None, want_currency_count=None):
         L_have_currency_count = have_currency_count
@@ -615,7 +635,7 @@ class ActionSpeculate(ActionBase):
         
         self.TargetManager.WinCapturing.UpdateScreenshot()
         L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.GOLD_LT_LOC, CalcTarget.GOLD_RT_LOC)   
-        self.Gold = int(OCR.GetTextFromImg(L_CropImg, filters=False)[0])
+        self.Gold = int(OCR.GetTextFromImg(L_CropImg, thresh=127)[0])
         return self.Gold
     
     def PlaceLot(self):
@@ -658,34 +678,41 @@ class ActionSpeculate(ActionBase):
          
     def FillStockExpeditionCurrency(self):
         
-        ExpeditionCurrencies = ("COINS", "ARTIFACT_ORDER")
+        ExpeditionCurrencies = (Data.ECurrencyName.COINS, Data.ECurrencyName.ARTIFACT_ORDER)
         for expedition_currency_name in ExpeditionCurrencies:
-            if expedition_currency_name == "COINS":
+            if expedition_currency_name == Data.ECurrencyName.COINS:
                 enough_count_expedition_currency = self.ENOUGH_COUNT_COINS
             else:
                 enough_count_expedition_currency = self.ENOUGH_COUNT_ARTIFACT_EXPEDITION
         
             if self.CurrencyCountData.get(expedition_currency_name) < enough_count_expedition_currency:
                 RequiredAmountCurrency = enough_count_expedition_currency - self.CurrencyCountData.get(expedition_currency_name)
-                self.UpdateRateCurrencyCache("EXALT", expedition_currency_name)
+                self.UpdateRateCurrencyCache(Data.ECurrencyName.EXALT, expedition_currency_name)
             
                 if self.RateCurrencyCache >= RequiredAmountCurrency:
-                    if self.CurrencyCountData.get("EXALT") < 1:
-                        self.BuyCurrency("CHAOS", have_currency_count=1, want_currency_name="EXALT")
+                    if self.CurrencyCountData.get(Data.ECurrencyName.EXALT) < 1:
+                        self.BuyCurrency(Data.ECurrencyName.CHAOS, have_currency_count=1, want_currency_name=Data.ECurrencyName.EXALT)
                         
-                    self.BuyCurrency("EXALT", 1, want_currency_name=expedition_currency_name)
+                    self.BuyCurrency(Data.ECurrencyName.EXALT, 1, want_currency_name=expedition_currency_name)
                     
                 else:    
                     RequiredCountExalt = math.ceil(RequiredAmountCurrency / self.RateCurrencyCache)
-                    if self.CurrencyCountData.get("EXALT") < RequiredCountExalt:
-                        self.BuyCurrency("CHAOS", want_currency_name="EXALT", want_currency_count=RequiredCountExalt)
+                    if self.CurrencyCountData.get(Data.ECurrencyName.EXALT) < RequiredCountExalt:
+                        self.BuyCurrency(Data.ECurrencyName.CHAOS, want_currency_name=Data.ECurrencyName.EXALT, want_currency_count=RequiredCountExalt)
                     
-                    self.BuyCurrency("EXALT", RequiredCountExalt, want_currency_name=expedition_currency_name)
+                    self.BuyCurrency(Data.ECurrencyName.EXALT, RequiredCountExalt, want_currency_name=expedition_currency_name)
                 
     def GoldMining(self):
+        CountPrimaryCurrency = self.CurrencyCountData.get(self.PrimaryCurrency)
+        ReqruiredGeneralCountGold = self.GetCostDeal(self.PrimaryCurrency, have_currency_count=CountPrimaryCurrency, 
+                                                    want_currency_name=self.SecondaryCurrency, want_currency_count=None)
+        ReqruiredGeneralCountGold = ReqruiredGeneralCountGold * 10
         self.GeneralFuncs.CloseWindow(Data.EWindow.TRADE_CURRENCY_WINDOW)
         self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
-        
+        self.GeneralFuncs.PickCurrencyFromChest(Data.ECurrencyName.ARTIFACT_ORDER, Data.ETypePickCurrency.ALL)
+        self.GeneralFuncs.CloseWindow(Data.EWindow.CHEST_WINDOW)
+        self.ExpeditionFuncs.OpenExpeditionWindow(Data.EWindow.ROG_WINDOW)
+        self.ExpeditionFuncs.EnterFilter()
            
     def run(self):
         while True:
@@ -695,11 +722,13 @@ class ActionSpeculate(ActionBase):
 
             self.UpdateAllCurrencyCountData()               
             self.FillStockExpeditionCurrency()
-            if ((self.CurrencyCountData.get("COINS") >= self.ENOUGH_COUNT_COINS) 
-                and (self.CurrencyCountData.get("ARTIFACT_ORDER") >= self.ENOUGH_COUNT_ARTIFACT_EXPEDITION)):
+            if ((self.CurrencyCountData.get(Data.ECurrencyName.COINS) >= self.ENOUGH_COUNT_COINS) 
+                and (self.CurrencyCountData.get(Data.ECurrencyName.ARTIFACT_ORDER) >= self.ENOUGH_COUNT_ARTIFACT_EXPEDITION)):
                 
                 if self.IsEnoughGold():
                     print("HELLO")
+                else:
+                    self.GoldMining()
                 
                 
                 

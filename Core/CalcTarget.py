@@ -55,6 +55,10 @@ GOLD_RT_LOC = (GOLD_CENTER_LOC[0], GOLD_CENTER_LOC[1] + 11)
 SIZE_IMG_CURRENCY = (cv.imread("Speculate/SizeImgCurrency.png")).shape[0]
 ######## Chest END ############
 
+######## Expedition START ############
+FILTER_RARE_ITEM = "редкость: редкий" 
+######## Expedition END ############
+
 class ELocOrient(enum.Enum):
     
     UNDER = 0
