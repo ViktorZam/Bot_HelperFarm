@@ -196,12 +196,12 @@ class ActionSpeculate(ActionBase):
     }
     
     CurrencyOCRData = {
-        #                           LT_Offset   RT_Offset filters
-        Data.ECurrencyName.DIVINE : ((-5, -10), (0, -10), True),
-        Data.ECurrencyName.CHAOS : ((-5, -10), (0, -10), True),
-        Data.ECurrencyName.EXALT : ((-5, -10), (0, -10), True),
-        Data.ECurrencyName.ARTIFACT_ORDER : ((-5, -10), (0, -17), False),
-        Data.ECurrencyName.COINS : ((-5, -10), (0, -10), True),
+        #                           LT_Offset   RT_Offset filters thresh
+        Data.ECurrencyName.DIVINE : ((-5, -10), (0, -10), True, 175),
+        Data.ECurrencyName.CHAOS : ((-5, -10), (0, -10), True, 175),
+        Data.ECurrencyName.EXALT : ((-5, -10), (0, -10), True, 175),
+        Data.ECurrencyName.ARTIFACT_ORDER : ((-5, -10), (0, -17), False, 175),
+        Data.ECurrencyName.COINS : ((-2, -8), (-7, -11), True, 165),
     }
     
     ENOUGH_COUNT_COINS = 100
@@ -228,17 +228,14 @@ class ActionSpeculate(ActionBase):
         self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
         self.GeneralFuncs.CloseWindow(Data.EWindow.CHEST_WINDOW)
         
-        LocObject = self.TargetManager.FindLocObject("Speculate/CharInventory.png")
-        if LocObject is None:
-            pyautogui.press("i")
-            time.sleep(1.5)
+        self.GeneralFuncs.OpenCharInv()
             
         #self.PickingAllCurrency()
+                        
+        self.start()
 
-        #self.start()
-        self.ExpeditionFuncs.OpenExpeditionWindow(Data.EWindow.ROG_WINDOW)
-        self.ExpeditionFuncs.EnterFilter()
-        
+                        
+                        
     def OpenCurrencyTradeWindow(self):
         LocObject = self.TargetManager.FindLocObject("Speculate/TradeCurrencyWindow.png")
         if not LocObject is None:
@@ -319,7 +316,7 @@ class ActionSpeculate(ActionBase):
     
     def ClearCharInv(self):
         self.GeneralFuncs.OpenChest()
-        L_AllLocsCharInvSlots = self.TargetManager.GetAllLocsCharInvSlots(CalcTarget.ETypeCoord.GLOBAL)
+        L_AllLocsCharInvSlots = self.TargetManager.GetAllLocsCells(window=Data.EWindow.CHAR_INV_WINDOW, TypeCoord=CalcTarget.ETypeCoord.GLOBAL)
         debug_counter = 0
         pyautogui.keyDown("ctrlleft")
         for loc in L_AllLocsCharInvSlots:
@@ -443,6 +440,7 @@ class ActionSpeculate(ActionBase):
         LT_Offset = self.CurrencyOCRData.get(Currency)[0]
         RT_Offset = self.CurrencyOCRData.get(Currency)[1]
         L_filters = self.CurrencyOCRData.get(Currency)[2]
+        L_thresh = self.CurrencyOCRData.get(Currency)[3]
         if LocObject:
             LocObject = list(LocObject)
             LT_LocObject = LocObject[0]
@@ -450,7 +448,7 @@ class ActionSpeculate(ActionBase):
             LocObject[0] = (LT_LocObject[0] + LT_Offset[0], LT_LocObject[1] + LT_Offset[1])
             LocObject[1] = (RT_LocObject[0] + RT_Offset[0], RT_LocObject[1] + RT_Offset[1])  
             L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
-            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25, filters=L_filters)[0])
+            CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25, thresh=L_thresh, filters=L_filters)[0])
         else:
             CurrencyValue = 0 
 
@@ -620,7 +618,7 @@ class ActionSpeculate(ActionBase):
         time.sleep(1)    
         self.TargetManager.WinCapturing.UpdateScreenshot()
         L_CropImg = self.TargetManager.WinCapturing.CropImg(CalcTarget.CURRENT_CURRENCY_RATE_LT_LOC, CalcTarget.CURRENT_CURRENCY_RATE_RT_LOC)   
-        rate_currency = OCR.GetTextFromImg(L_CropImg, filters=False, allowchars=OCR.RATE_CURRENCY_ALLOW_LIST)
+        rate_currency = OCR.GetTextFromImg(L_CropImg, thresh=160, allowchars=OCR.RATE_CURRENCY_ALLOW_LIST)
         self.RateCurrencyCache = OCR.RateStringToNumbers(rate_currency)[0]
     
     def UpdateCountGold(self):
@@ -708,11 +706,47 @@ class ActionSpeculate(ActionBase):
                                                     want_currency_name=self.SecondaryCurrency, want_currency_count=None)
         ReqruiredGeneralCountGold = ReqruiredGeneralCountGold * 10
         self.GeneralFuncs.CloseWindow(Data.EWindow.TRADE_CURRENCY_WINDOW)
+        while self.Gold < ReqruiredGeneralCountGold:
+            self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
+            self.GeneralFuncs.PickCurrencyFromChest(Data.ECurrencyName.ARTIFACT_ORDER, Data.ETypePickCurrency.ALL)
+            self.GeneralFuncs.CloseWindow(Data.EWindow.CHEST_WINDOW)
+            self.ExpeditionFuncs.OpenExpeditionWindow(Data.EWindow.ROG_WINDOW)
+            self.ExpeditionFuncs.EnterFilter()
+            self.ExpeditionTrading()
+            self.UpdateAllCurrencyCountData()               
+            self.FillStockExpeditionCurrency()
+            
+    def ExpeditionTrading(self):
+        isEnoughCoins = True
+        L_LastCoordBuying = None
+        L_StatusPurchasedItem = None
+        item_coord = None
+        while isEnoughCoins:
+            item_coord = self.ExpeditionFuncs.FindRareItemForBuying(Data.EWindow.ROG_WINDOW, first_coord=item_coord)
+            if item_coord:
+                L_StatusPurchasedItem = self.ExpeditionFuncs.BuyExpeditionItem(item_coord)
+                if L_StatusPurchasedItem:
+                    L_LastCoordBuying = self.GeneralFuncs.SellItemToTrader(special_coord=L_LastCoordBuying)
+            else:
+                LocObject = self.TargetManager.FindLocObject("Speculate/RefreshExpeditionTradeList.png")
+                if not LocObject is None:
+                    self.TargetLoc = self.TargetManager.GetTargetLoc(CalcTarget.ELocOrient.CENTER, LocObject)
+                    if self.TargetLoc:
+                        pyautogui.moveTo(self.TargetLoc[0], self.TargetLoc[1], 0.5)
+                        time.sleep(0.5)
+                        item_coord = None
+                        LocObject = self.TargetManager.FindLocObject("Speculate/NotEnoughCoins.png")
+                        if LocObject is None:
+                            pyautogui.click()
+                            time.sleep(1)
+                        else:
+                            isEnoughCoins = False
+                            
+        self.GeneralFuncs.CloseWindow(Data.EWindow.EXPEDITION_DEAL_WINDOW)
         self.GeneralFuncs.OpenChestTab(Data.ETab.EXPEDITION_CHEST_TAB)
-        self.GeneralFuncs.PickCurrencyFromChest(Data.ECurrencyName.ARTIFACT_ORDER, Data.ETypePickCurrency.ALL)
+        self.ClearCharInv()
         self.GeneralFuncs.CloseWindow(Data.EWindow.CHEST_WINDOW)
-        self.ExpeditionFuncs.OpenExpeditionWindow(Data.EWindow.ROG_WINDOW)
-        self.ExpeditionFuncs.EnterFilter()
+        self.GeneralFuncs.OpenCharInv()
            
     def run(self):
         while True:
@@ -743,6 +777,16 @@ class ActionSpeculate(ActionBase):
             print("mouse pos: ", pyautogui.position())
             #################### Debug END
             
-    def rrr(self):
-        pass
-    
+    def Debug(self):
+        while True:
+            time.sleep(2)
+            ##################### Debug BEGIN
+            EdgesWindow = win32gui.GetWindowRect(self.HandleWnd)
+            EdgesWindow = list(EdgesWindow)
+            EdgesWindow[0] = EdgesWindow[0] + WinCap.BORDER_PIXELS_SIZE
+            EdgesWindow[1] = EdgesWindow[1] + WinCap.TITLEBAR_PIXELS_SIZE 
+            print("Left pos win: ", EdgesWindow)
+            print("mouse pos: ", pyautogui.position())
+            #################### Debug END
+
+

@@ -30,6 +30,7 @@ class EWindow(strenum.StrEnum):
     CHEST_WINDOW = "Speculate/ChestWindow.png"
     EXPEDITION_DEAL_WINDOW = "Speculate/ExpeditionDealWindow.png"
     ROG_WINDOW = "Speculate/RogWindow.png"
+    CHAR_INV_WINDOW = "Speculate/CharInventory.png"
 
 ACCORDANCE_WINDOW_AND_CHAR = {
     EWindow.ROG_WINDOW : "Speculate/Rog.png",

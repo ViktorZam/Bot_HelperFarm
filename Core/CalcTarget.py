@@ -7,6 +7,7 @@ from Core import WindowCapture as WinCap
 import numpy
 import win32gui
 import pyautogui
+from Core import Data
 
 UNDER_IMG_OFFSET = 110
 
@@ -56,7 +57,12 @@ SIZE_IMG_CURRENCY = (cv.imread("Speculate/SizeImgCurrency.png")).shape[0]
 ######## Chest END ############
 
 ######## Expedition START ############
-FILTER_RARE_ITEM = "редкость: редкий" 
+FILTER_RARE_ITEM = "редкость: редкий"
+
+XY_OFFSET_FIRST_TRADER_SLOT = (178, 223) # local pos for 1280x800
+MAX_COUNT_ROW_TRADER_SLOTS = 11
+MAX_COUNT_COLUMN_TRADER_SLOTS = 12
+MAX_COUNT_TRADER_SLOTS = MAX_COUNT_ROW_TRADER_SLOTS * MAX_COUNT_COLUMN_TRADER_SLOTS
 ######## Expedition END ############
 
 class ELocOrient(enum.Enum):
@@ -68,7 +74,7 @@ class ETypeCoord(enum.Enum):
     
     LOCAL = 0
     GLOBAL = 1
-       
+     
 class TargetManager:
     LootImgNames = None
     DebugMode = None
@@ -194,24 +200,42 @@ class TargetManager:
         
         return L_AllLocsWithdrawn
  
-    def GetAllLocsCharInvSlots(self, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
-        L_LeftTopLocCharInvSlot = list(XY_OFFSET_FIRST_CHAR_INV_SLOT)
-        L_AllLocsCharInvSlots = []
-        L_LocCharInvSlot = list()
-        for ColumnSlot in range(MAX_COUNT_COLUMN_CHAR_INV_SLOTS):
-            L_XLocCharInvSlot = L_LeftTopLocCharInvSlot[0] + SIZE_CHAR_INV_SLOT * ColumnSlot
-            for RowSlot in range(MAX_COUNT_ROW_CHAR_INV_SLOTS):
-                L_YLocCharInvSlot = L_LeftTopLocCharInvSlot[1] + SIZE_CHAR_INV_SLOT * RowSlot  
-                L_LocCharInvSlot = [L_XLocCharInvSlot, L_YLocCharInvSlot]
+    def GetAllLocsCells(self, window: Data.EWindow, TypeCoord: ETypeCoord = ETypeCoord.LOCAL):
+        if window == Data.EWindow.CHAR_INV_WINDOW:
+            xy_offset_first_cell = XY_OFFSET_FIRST_CHAR_INV_SLOT
+            max_count_columns = MAX_COUNT_COLUMN_CHAR_INV_SLOTS
+            max_count_rows = MAX_COUNT_ROW_CHAR_INV_SLOTS
+        elif window == Data.EWindow.EXPEDITION_DEAL_WINDOW:
+            xy_offset_first_cell = XY_OFFSET_FIRST_TRADER_SLOT
+            max_count_columns = MAX_COUNT_COLUMN_TRADER_SLOTS
+            max_count_rows = MAX_COUNT_ROW_TRADER_SLOTS
+        
+        L_LeftTopLocCells= list(xy_offset_first_cell)
+        L_AllLocsCells = []
+        L_LocCells = list()
+        for ColumnSlot in range(max_count_columns):
+            L_XLocCells = L_LeftTopLocCells[0] + SIZE_CHAR_INV_SLOT * ColumnSlot
+            for RowSlot in range(max_count_rows):
+                L_YLocCells = L_LeftTopLocCells[1] + SIZE_CHAR_INV_SLOT * RowSlot  
+                L_LocCells = [L_XLocCells, L_YLocCells]
                 if (TypeCoord == ETypeCoord.GLOBAL):
-                    L_LocCharInvSlot = self.ConvertLocalCoordToGlobal(L_LocCharInvSlot)
+                    L_LocCells = self.ConvertLocalCoordToGlobal(L_LocCells)
                 
-                L_AllLocsCharInvSlots.append(L_LocCharInvSlot)
+                L_AllLocsCells.append(L_LocCells)
     
         ##################### Debug BEGIN
+        #time.sleep(1)
         #self.WinCapturing.UpdateScreenshot()
-        #for loc in L_AllLocsCharInvSlots:    
-            #cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
-        #cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        #if (TypeCoord == ETypeCoord.LOCAL):
+        #    for loc in L_AllLocsCells:    
+        #        cv.drawMarker(self.WinCapturing.ScreenWindow, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #    cv.imwrite("Debug/" + str(time.time()) + ".png", self.WinCapturing.ScreenWindow)
+        #else:
+        #    screen = pyautogui.screenshot()
+        #    screen = numpy.array(screen)
+        #    screen = cv.cvtColor(screen, cv.COLOR_RGB2BGR)
+        #    for loc in L_AllLocsCells:    
+        #        cv.drawMarker(screen, loc, color=(255,0,255), markerType=cv.MARKER_CROSS)
+        #    cv.imwrite("Debug/" + str(time.time()) + ".png", screen)
         #################### Debug END
-        return L_AllLocsCharInvSlots
+        return L_AllLocsCells

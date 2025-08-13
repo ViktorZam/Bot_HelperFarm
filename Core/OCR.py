@@ -3,7 +3,6 @@ import cv2 as cv
 import time
 import numpy as np
 
-
 reader = easyocr.Reader(["ru"], False)
 CURRENCY_ALLOW_LIST = '0123456789'
 RATE_CURRENCY_ALLOW_LIST = '0123456789.,:'
@@ -12,7 +11,7 @@ RATE_CURRENCY_ALLOW_LIST = '0123456789.,:'
 def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars=CURRENCY_ALLOW_LIST, check_paragraph=False):
     
     #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
-    img = cv.resize(img, None, fx=IncSizeImg, fy=IncSizeImg, interpolation=cv.INTER_LANCZOS4)
+    img = cv.resize(img, None, fx=IncSizeImg, fy=IncSizeImg, interpolation=cv.INTER_LANCZOS4)#cv.INTER_LANCZOS4
     if filters:
         gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         sharpen_kernel = np.array([[0,-1,0], [-1,5,-1], [0,-1,0]]) #[-1,-1,-1], [-1,9,-1], [-1,-1,-1]#[0,-1,0], [-1,5,-1], [0,-1,0]
@@ -23,7 +22,7 @@ def GetTextFromImg(img=None, IncSizeImg=25, thresh=175, filters=True, allowchars
         img = binary_img
  
 
-    #cv.imwrite("Debug/" + str(time.time()) + ".png", img)
+    cv.imwrite("Debug/" + str(time.time()) + ".png", img)
     
     result = reader.readtext(img, detail=0, allowlist=allowchars, paragraph=check_paragraph)
     print(result)
