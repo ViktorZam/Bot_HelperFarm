@@ -3,7 +3,10 @@ import cv2 as cv
 import time
 import numpy as np
 
-reader = easyocr.Reader(["ru"], False)
+reader = easyocr.Reader(["ru"], False, 
+                        model_storage_directory="EasyOCR/model",
+                        user_network_directory="EasyOCR/user_network",
+                        recog_network='custom_model')
 CURRENCY_ALLOW_LIST = '0123456789'
 RATE_CURRENCY_ALLOW_LIST = '0123456789.,:'
 

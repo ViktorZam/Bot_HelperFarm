@@ -448,6 +448,24 @@ class ActionSpeculate(ActionBase):
             LocObject[0] = (LT_LocObject[0] + LT_Offset[0], LT_LocObject[1] + LT_Offset[1])
             LocObject[1] = (RT_LocObject[0] + RT_Offset[0], RT_LocObject[1] + RT_Offset[1])  
             L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
+            #if Currency == Data.ECurrencyName.COINS:
+            #    for index in range(137, 200):
+            #        path_to_currency = Data.CURRENCY_IMG_PATH.get(Currency)[0]
+            #        LocObject = self.TargetManager.FindLocObject(path_to_currency)
+            #        CurrencyValue = None
+            #        LT_Offset = self.CurrencyOCRData.get(Currency)[0]
+            #        RT_Offset = self.CurrencyOCRData.get(Currency)[1]
+            #        L_filters = self.CurrencyOCRData.get(Currency)[2]
+            #        L_thresh = self.CurrencyOCRData.get(Currency)[3]
+            #        if LocObject:
+            #            LocObject = list(LocObject)
+            #            LT_LocObject = LocObject[0]
+            #            RT_LocObject = LocObject[1]
+            #            LocObject[0] = (LT_LocObject[0] + LT_Offset[0], LT_LocObject[1] + LT_Offset[1])
+            #            LocObject[1] = (RT_LocObject[0] + RT_Offset[0], RT_LocObject[1] + RT_Offset[1])  
+            #            L_CropImg = self.TargetManager.WinCapturing.CropImg(LocObject[0], LocObject[1])
+            #        OCR.GetTextFromImg(L_CropImg, IncSizeImg=25, thresh=index, filters=L_filters)
+            #else:
             CurrencyValue = int(OCR.GetTextFromImg(L_CropImg, IncSizeImg=25, thresh=L_thresh, filters=L_filters)[0])
         else:
             CurrencyValue = 0 
